@@ -1,4 +1,409 @@
-/* Cron Generator Specifics */
+/* =========================================
+   1. RESET & VARIABLES
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-page: #fafafa;
+    --bg-card: #ffffff;
+    --border-card: #e0e0e0;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --accent: #0066cc;
+    --accent-hover: #0052a3;
+    --bg-output: #f5f5f5;
+    --font-mono: 'Courier New', Courier, monospace;
+    --font-ui: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    font-family: var(--font-ui);
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    width: 100%;
+}
+
+/* =========================================
+   2. HEADER & FOOTER
+   ========================================= */
+.main-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-card);
+}
+
+.nav-logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+}
+
+.nav-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+.main-footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    border-top: 1px solid var(--border-card);
+    background-color: var(--bg-card);
+    margin-top: auto;
+}
+
+/* =========================================
+   3. HOMEPAGE: HERO & FILTERS
+   ========================================= */
+.hero {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+.hero p {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.filters {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.filter-btn {
+    padding: 0.5rem 1.25rem;
+    border: 1px solid var(--border-card);
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.filter-btn.active {
+    background-color: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+/* =========================================
+   4. HOMEPAGE: TOOLS GRID
+   ========================================= */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.tool-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.tool-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    border-color: var(--accent);
+}
+
+.tool-card.tool-wip {
+    opacity: 0.7;
+}
+
+.tool-card.tool-wip:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--border-card);
+}
+
+.tool-category {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+}
+
+.tool-card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.tool-card p {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+
+.tool-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: color 0.2s;
+}
+
+.tool-link:hover {
+    color: var(--accent-hover);
+}
+
+.tool-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    background-color: var(--bg-output);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 4px;
+    align-self: flex-start;
+}
+
+/* =========================================
+   5. TOOL PAGES: COMMON LAYOUT
+   ========================================= */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: var(--accent-hover);
+}
+
+.tool-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-card);
+    padding-bottom: 1.5rem;
+}
+
+.tool-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.tool-header p {
+    color: var(--text-secondary);
+    font-size: 1.0625rem;
+}
+
+.how-to {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.how-to h2 {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.how-to ol {
+    padding-left: 1.5rem;
+}
+
+.how-to li {
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.tool-area {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    resize: vertical;
+    margin-bottom: 1rem;
+    background-color: var(--bg-page);
+    transition: border-color 0.2s;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background-color: var(--bg-card);
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.control-left,
+.control-right {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+select {
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    background-color: var(--bg-card);
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn-secondary {
+    background-color: var(--bg-output);
+    color: var(--text-primary);
+    border: 1px solid var(--border-card);
+}
+
+.btn-secondary:hover {
+    background-color: var(--border-card);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+pre {
+    background-color: var(--bg-output);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 1rem;
+    overflow-x: auto;
+    min-height: 100px;
+}
+
+pre code {
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: var(--text-primary);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* =========================================
+   6. CRON GENERATOR SPECIFIC
+   ========================================= */
 .cron-builders {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -8,9 +413,10 @@
 
 .cron-field label {
     display: block;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
     color: var(--text-secondary);
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.375rem;
 }
 
 .cron-field select {
@@ -30,21 +436,29 @@
     padding: 0.75rem;
     font-family: var(--font-mono);
     font-size: 1.125rem;
+    font-weight: 600;
     border: 1px solid var(--border-card);
-    border-radius: 4px;
+    border-radius: 6px;
     background-color: var(--bg-output);
     text-align: center;
     min-width: 200px;
+    color: var(--text-primary);
 }
 
 .cron-description {
     font-size: 1.125rem;
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 1.5rem;
     color: var(--accent);
+    padding: 1rem;
+    background-color: rgba(0, 102, 204, 0.05);
+    border-radius: 6px;
+    border-left: 4px solid var(--accent);
 }
 
-/* Subnet Calculator Specifics */
+/* =========================================
+   7. SUBNET CALCULATOR SPECIFIC
+   ========================================= */
 .subnet-inputs {
     display: flex;
     gap: 1.5rem;
@@ -61,33 +475,38 @@
     width: 100%;
     padding: 0.75rem;
     border: 1px solid var(--border-card);
-    border-radius: 4px;
+    border-radius: 6px;
     font-family: var(--font-mono);
     font-size: 1rem;
+    background-color: var(--bg-page);
+    transition: border-color 0.2s;
 }
 
 .text-input:focus {
     outline: none;
     border-color: var(--accent);
+    background-color: var(--bg-card);
 }
 
 .error-message {
     background-color: #fee2e2;
-    color: #dc3545;
-    padding: 0.75rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
+    color: #b91c1c;
+    padding: 0.875rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
     font-size: 0.9375rem;
+    font-weight: 500;
+    border: 1px solid #fecaca;
 }
 
 .subnet-results {
-    transition: opacity 0.2s;
+    transition: opacity 0.3s;
 }
 
 .result-row {
     display: flex;
     align-items: center;
-    padding: 0.75rem 0;
+    padding: 0.875rem 0;
     border-bottom: 1px solid var(--border-card);
     gap: 1rem;
     flex-wrap: wrap;
@@ -99,20 +518,25 @@
 
 .result-label {
     flex: 1;
-    font-weight: 500;
-    min-width: 150px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 160px;
+    font-size: 0.9375rem;
 }
 
 .result-value {
     flex: 2;
     font-family: var(--font-mono);
     color: var(--text-primary);
-    min-width: 150px;
+    font-weight: 600;
+    min-width: 180px;
+    font-size: 0.9375rem;
 }
 
 .btn-copy {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.875rem;
+    padding: 0.375rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
     background-color: transparent;
     border: 1px solid var(--border-card);
     border-radius: 4px;
@@ -124,26 +548,61 @@
 .btn-copy:hover {
     border-color: var(--accent);
     color: var(--accent);
+    background-color: rgba(0, 102, 204, 0.05);
 }
 
 .binary-section {
     margin-top: 2rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--border-card);
+    border-top: 2px solid var(--border-card);
 }
 
-/* Responsive adjustments */
+/* =========================================
+   8. RESPONSIVE DESIGN
+   ========================================= */
 @media (max-width: 768px) {
+    .main-nav {
+        padding: 1rem;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .control-left,
+    .control-right {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .btn {
+        flex: 1;
+        text-align: center;
+    }
+
     .cron-builders {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
+    .cron-builders .cron-field:last-child {
+        grid-column: span 2;
+    }
+
     .result-row {
         flex-direction: column;
         align-items: flex-start;
-        gap: 0.25rem;
+        gap: 0.375rem;
     }
-    
+
     .btn-copy {
         align-self: flex-end;
         margin-top: 0.25rem;
