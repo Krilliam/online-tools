@@ -4,7 +4,7 @@ function injectLayout() {
         header.innerHTML = `
             <nav class="main-nav">
                 <a href="index.html" class="nav-logo">Online Tools</a>
-                <a href="https://github.com/yourusername/online-tools" target="_blank" class="nav-link">GitHub</a>
+                <a href="https://github.com/Krilliam/online-tools" target="_blank" class="nav-link">GitHub</a>
             </nav>
         `;
     }
