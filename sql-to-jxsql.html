@@ -27,9 +27,14 @@
                 <li>Use "Copy" to copy the result to clipboard</li>
             </ol>
             <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
-                <strong>Note:</strong> This tool converts table references to JXTAB(), column references to JXCOL(), 
-                concatenations to JXCONCAT(), and substring functions to JXSUBSTRING().
-            </p>
+    <strong>Conversion rules:</strong><br>
+    • <code>alias.column</code> → <code>JXCOL(alias:column)</code><br>
+    • <code>FROM table alias</code> → <code>FROM JXTAB(table:alias)</code><br>
+    • <code>FROM table</code> (no alias) → <code>FROM JXTAB(table)</code><br>
+    • <code>col1 || col2</code> (PostgreSQL) → <code>JXCONCAT(JXCOL(...),JXCOL(...))</code><br>
+    • <code>col1 + col2</code> (MSSQL) → <code>JXCONCAT(JXCOL(...),JXCOL(...))</code><br>
+    • <code>SUBSTRING(col, start, length)</code> → <code>JXSUBSTRING(JXCOL(...), start, end)</code>
+</p>
         </section>
 
         <section class="tool-area">
