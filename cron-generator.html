@@ -6,10 +6,9 @@
     <title>Cron Generator - Online Tools</title>
     <meta name="description" content="Visual interface to build cron expressions with preview of next executions. Free, no login.">
     <link rel="stylesheet" href="css/style.css">
-    <!-- Libreria leggera per tradurre cron in linguaggio umano -->
+    
     <script src="https://unpkg.com/cronstrue@2.50.0/dist/cronstrue.min.js"></script>
-    <!-- Libreria per calcolare le prossime esecuzioni -->
-    <script src="https://cdn.jsdelivr.net/npm/cron-parser@4.9.0/lib/browser/cron-parser.min.js"></script>
+    <script src="https://unpkg.com/cron-parser@4.9.0/lib/browser/cron-parser.min.js"></script>
 </head>
 <body>
     <div id="header"></div>
@@ -93,7 +92,7 @@
                 <p id="cron-description" class="cron-description">Every minute</p>
                 
                 <label class="input-label">NEXT 5 EXECUTIONS</label>
-                <pre id="cron-next-runs"><code></code></pre>
+                <pre id="cron-next-runs"><code>Loading...</code></pre>
                 
                 <div class="control-right" style="margin-top: 1rem;">
                     <button id="copy-schedule-btn" class="btn btn-secondary">Copy Schedule</button>
