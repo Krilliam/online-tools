@@ -10,6 +10,15 @@
       "status": "live"
     },
     {
+      "id": "sql-to-jxsql",
+      "name": "SQL to JXSQL Translator",
+      "description": "Convert PostgreSQL or MSSQL queries to JXSQL (Janox SQL) syntax.",
+      "url": "sql-to-jxsql.html",
+      "category": "database",
+      "tags": ["sql", "jxsql", "janox", "postgresql", "mssql", "translator"],
+      "status": "live"
+    },
+    {
       "id": "cron-generator",
       "name": "Cron Generator",
       "description": "Visual interface to build cron expressions with preview of next executions.",
