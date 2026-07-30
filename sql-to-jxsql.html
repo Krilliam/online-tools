@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL to JXSQL Translator - Online Tools</title>
+    <meta name="description" content="Convert PostgreSQL or MSSQL queries to JXSQL (Janox SQL) syntax. Free, no login, all calculations in your browser.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>SQL to JXSQL Translator</h1>
+            <p>Convert PostgreSQL or MSSQL queries to JXSQL (Janox SQL) syntax.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Paste your SQL query in the input field</li>
+                <li>Select the SQL dialect (PostgreSQL or MSSQL)</li>
+                <li>Click "Convert" to generate the JXSQL code</li>
+                <li>Use "Copy" to copy the result to clipboard</li>
+            </ol>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                <strong>Note:</strong> This tool converts table references to JXTAB(), column references to JXCOL(), 
+                concatenations to JXCONCAT(), and substring functions to JXSUBSTRING().
+            </p>
+        </section>
+
+        <section class="tool-area">
+            <label for="sql-input" class="input-label">INPUT SQL</label>
+            <textarea id="sql-input" rows="12" placeholder="SELECT t1.col1, t1.col2 FROM tabella1 t1 WHERE t1.col1 || t1.col2 LIKE '%PROVA%'"></textarea>
+
+            <div class="controls">
+                <div class="control-left">
+                    <label for="sql-dialect" class="sr-only">SQL Dialect</label>
+                    <select id="sql-dialect">
+                        <option value="postgresql">PostgreSQL</option>
+                        <option value="mssql">MSSQL</option>
+                    </select>
+                </div>
+                <div class="control-right">
+                    <button id="clear-btn" class="btn btn-secondary">Clear</button>
+                    <button id="convert-btn" class="btn btn-primary">Convert</button>
+                    <button id="copy-btn" class="btn btn-secondary">Copy</button>
+                </div>
+            </div>
+
+            <label for="sql-output" class="input-label">OUTPUT JXSQL</label>
+            <pre id="sql-output"><code></code></pre>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/sql-to-jxsql.js"></script>
+</body>
+</html>
