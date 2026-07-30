@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cron Generator - Online Tools</title>
-    <meta name="description" content="Visual interface to build cron expressions with preview of next executions.">
+    <meta name="description" content="Visual interface to build cron expressions with preview of next executions. Free, no login.">
     <link rel="stylesheet" href="css/style.css">
+    <!-- Libreria leggera per tradurre cron in linguaggio umano -->
+    <script src="https://unpkg.com/cronstrue@2.50.0/dist/cronstrue.min.js"></script>
+    <!-- Libreria per calcolare le prossime esecuzioni -->
+    <script src="https://cdn.jsdelivr.net/npm/cron-parser@4.9.0/lib/browser/cron-parser.min.js"></script>
 </head>
 <body>
     <div id="header"></div>
@@ -15,12 +19,92 @@
 
         <section class="tool-header">
             <h1>Cron Generator</h1>
-            <p>Coming soon...</p>
+            <p>Build cron expressions visually and preview the next executions.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Select values from the dropdowns or type directly in the expression field</li>
+                <li>The human-readable description and next executions update automatically</li>
+                <li>Click "Copy" to copy the expression or the schedule to your clipboard</li>
+            </ol>
+        </section>
+
+        <section class="tool-area">
+            <label class="input-label">BUILD EXPRESSION</label>
+            <div class="cron-builders">
+                <div class="cron-field">
+                    <label for="cron-min">Minute</label>
+                    <select id="cron-min">
+                        <option value="*">*</option>
+                        <option value="0">0</option>
+                        <option value="15">15</option>
+                        <option value="30">30</option>
+                        <option value="45">45</option>
+                    </select>
+                </div>
+                <div class="cron-field">
+                    <label for="cron-hour">Hour</label>
+                    <select id="cron-hour">
+                        <option value="*">*</option>
+                        <option value="0">0</option>
+                        <option value="6">6</option>
+                        <option value="12">12</option>
+                        <option value="18">18</option>
+                    </select>
+                </div>
+                <div class="cron-field">
+                    <label for="cron-dom">Day of Month</label>
+                    <select id="cron-dom">
+                        <option value="*">*</option>
+                        <option value="1">1</option>
+                        <option value="15">15</option>
+                        <option value="28">28</option>
+                    </select>
+                </div>
+                <div class="cron-field">
+                    <label for="cron-month">Month</label>
+                    <select id="cron-month">
+                        <option value="*">*</option>
+                        <option value="1">1 (Jan)</option>
+                        <option value="6">6 (Jun)</option>
+                        <option value="12">12 (Dec)</option>
+                    </select>
+                </div>
+                <div class="cron-field">
+                    <label for="cron-dow">Day of Week</label>
+                    <select id="cron-dow">
+                        <option value="*">*</option>
+                        <option value="0">0 (Sun)</option>
+                        <option value="1">1 (Mon)</option>
+                        <option value="5">5 (Fri)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="cron-expression-box">
+                <label for="cron-input" class="sr-only">Cron Expression</label>
+                <input type="text" id="cron-input" class="cron-input" value="* * * * *" readonly>
+                <button id="copy-cron-btn" class="btn btn-secondary">Copy Expression</button>
+            </div>
+
+            <div class="cron-output">
+                <p id="cron-description" class="cron-description">Every minute</p>
+                
+                <label class="input-label">NEXT 5 EXECUTIONS</label>
+                <pre id="cron-next-runs"><code></code></pre>
+                
+                <div class="control-right" style="margin-top: 1rem;">
+                    <button id="copy-schedule-btn" class="btn btn-secondary">Copy Schedule</button>
+                </div>
+            </div>
         </section>
     </main>
 
     <div id="footer"></div>
 
     <script src="js/common.js"></script>
+    <script src="js/cron-generator.js"></script>
 </body>
 </html>
