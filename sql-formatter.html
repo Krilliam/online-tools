@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Formatter - Online Tools</title>
+    <meta name="description" content="Format complex SQL queries online. Supports MySQL, PostgreSQL, SQLite. Free, no login, all calculations in your browser.">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/sql-formatter@15.4.2/dist/sql-formatter.min.js"></script>
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>SQL Formatter</h1>
+            <p>Format complex SQL queries with JOINs and subqueries to make them readable.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Paste your SQL query in the input field</li>
+                <li>Choose the SQL dialect (MySQL, PostgreSQL, SQLite)</li>
+                <li>Click "Format" to see the formatted query</li>
+                <li>Use "Copy" to copy the result to clipboard</li>
+            </ol>
+        </section>
+
+        <section class="tool-area">
+            <label for="sql-input" class="input-label">INPUT</label>
+            <textarea id="sql-input" rows="10" placeholder="SELECT u.id, u.name, COUNT(o.id) as order_count FROM users u LEFT JOIN orders o ON u.id = o.user_id WHERE u.active = 1 AND o.created_at > '2025-01-01' GROUP BY u.id HAVING order_count > 5 ORDER BY order_count DESC;"></textarea>
+
+            <div class="controls">
+                <div class="control-left">
+                    <label for="sql-dialect" class="sr-only">SQL Dialect</label>
+                    <select id="sql-dialect">
+                        <option value="mysql">MySQL</option>
+                        <option value="postgresql">PostgreSQL</option>
+                        <option value="sqlite">SQLite</option>
+                        <option value="sql">Standard SQL</option>
+                    </select>
+                </div>
+                <div class="control-right">
+                    <button id="clear-btn" class="btn btn-secondary">Clear</button>
+                    <button id="format-btn" class="btn btn-primary">Format</button>
+                    <button id="copy-btn" class="btn btn-secondary">Copy</button>
+                </div>
+            </div>
+
+            <label for="sql-output" class="input-label">OUTPUT</label>
+            <pre id="sql-output"><code></code></pre>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/sql-formatter.js"></script>
+</body>
+</html>
