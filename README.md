@@ -19,33 +19,36 @@ Collection of free online tools for developers. No login, no tracking, all calcu
 
 ## Project Structure
 
-```
-online-tools/
-├── index.html              # Homepage (dynamically generated from tools.json)
-├── tools.json              # Registry of all tools
-├── sql-formatter.html      # Tool: SQL Formatter
-├── cron-generator.html     # Tool: Cron Generator
-├── subnet-calculator.html  # Tool: Subnet Calculator
-├── css/
-│   └── style.css           # Common styles
-└── js/
-    ├── common.js           # Centralized header/footer
-    ├── homepage.js         # Homepage logic (reads tools.json, filters)
-    ├── sql-formatter.js    # SQL Formatter logic
-    ├── cron-generator.js   # Cron Generator logic
-    └── subnet-calculator.js # Subnet Calculator logic
-```
+    online-tools/
+    ├── index.html              # Homepage (dynamically generated from tools.json)
+    ├── tools.json              # Registry of all tools
+    ├── sql-formatter.html      # Tool: SQL Formatter
+    ├── sql-to-jxsql.html       # Tool: SQL to JXSQL Translator
+    ├── cron-generator.html     # Tool: Cron Generator
+    ├── subnet-calculator.html  # Tool: Subnet Calculator
+    ├── css/
+    │   └── style.css           # Common styles
+    └── js/
+        ├── common.js           # Centralized header/footer
+        ├── homepage.js         # Homepage logic (reads tools.json, filters)
+        ├── sql-formatter.js    # SQL Formatter logic
+        ├── sql-to-jxsql.js     # SQL to JXSQL Translator logic
+        ├── cron-generator.js   # Cron Generator logic
+        └── subnet-calculator.js # Subnet Calculator logic
 
 ## Available Tools
 
 ### SQL Formatter
 Format complex SQL queries with JOINs and subqueries to make them readable. Supports MySQL, PostgreSQL, SQLite.
 
+### SQL to JXSQL Translator
+Convert PostgreSQL or MSSQL queries to JXSQL (Janox SQL) syntax. Automatically translates table and column references to `JXTAB()` and `JXCOL()`, and converts concatenations and substring functions to their JXSQL equivalents.
+
 ### Cron Generator
-Visual interface to build cron expressions with preview of next executions.
+Visual interface to build cron expressions with a preview of the next 5 executions. Pure JavaScript implementation, no external dependencies.
 
 ### Subnet Calculator
-Calculate IPv4/IPv6 subnets: network address, broadcast, usable hosts, subnet mask, and binary representation.
+Calculate IPv4 subnets: network address, broadcast, usable hosts, subnet mask, and binary representation.
 
 ## How to Add a New Tool
 
@@ -59,19 +62,18 @@ Calculate IPv4/IPv6 subnets: network address, broadcast, usable hosts, subnet ma
    - Handle events, input validation, output
 
 3. **Update `tools.json`**:
-   ```json
-   {
-     "id": "json-validator",
-     "name": "JSON Validator",
-     "description": "Validate and format JSON files with error highlighting.",
-     "url": "json-validator.html",
-     "category": "devops",
-     "tags": ["json", "validator", "formatter"],
-     "status": "live"
-   }
-   ```
 
-4. **Push to GitHub**: Cloudflare Pages deploys automatically
+    {
+      "id": "json-validator",
+      "name": "JSON Validator",
+      "description": "Validate and format JSON files with error highlighting.",
+      "url": "json-validator.html",
+      "category": "devops",
+      "tags": ["json", "validator", "formatter"],
+      "status": "live"
+    }
+
+4. **Push to GitHub**: Cloudflare Pages deploys automatically.
 
 The homepage updates itself by reading the new entry in `tools.json`.
 
