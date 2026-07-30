@@ -32,17 +32,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. Next executions
         try {
-            const interval = cronParser.parseExpression(expression);
+            // Verifica che la libreria sia caricata
+            if (typeof cronParser === 'undefined') {
+                throw new Error('cron-parser library not loaded. Check network tab.');
+            }
+            
+            // Parsing con opzioni esplicite per evitare errori nel browser
+            const interval = cronParser.parseExpression(expression, {
+                currentDate: new Date(),
+                tz: Intl.DateTimeFormat().resolvedOptions().timeZone
+            });
+            
             let runs = [];
             for (let i = 0; i < 5; i++) {
-                runs.push(interval.next().toDate().toLocaleString('en-US', { 
+                const nextDate = interval.next().toDate();
+                runs.push(nextDate.toLocaleString('en-US', { 
                     weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', 
                     hour: '2-digit', minute: '2-digit' 
                 }));
             }
             nextRunsEl.textContent = runs.join('\n');
         } catch (e) {
-            nextRunsEl.textContent = 'Could not calculate next runs.';
+            console.error('Cron parser error details:', e);
+            nextRunsEl.textContent = 'Could not calculate next runs.\n(Press F12 to see error details in console)';
         }
     }
 
@@ -64,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Helper for copy feedback
     async function copyToClipboard(text, btn) {
-        if (!text) return;
+        if (!text || text.includes('Could not calculate')) return;
         try {
             await navigator.clipboard.writeText(text);
             const originalText = btn.textContent;
