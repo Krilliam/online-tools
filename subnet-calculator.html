@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subnet Calculator - Online Tools</title>
-    <meta name="description" content="Calculate IPv4/IPv6 subnets: network address, broadcast, usable hosts, subnet mask.">
+    <meta name="description" content="Calculate IPv4 subnets: network address, broadcast, usable hosts, subnet mask. Free, client-side only.">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -15,12 +15,86 @@
 
         <section class="tool-header">
             <h1>Subnet Calculator</h1>
-            <p>Coming soon...</p>
+            <p>Calculate IPv4 subnet details: network, broadcast, usable hosts, and binary representation.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Enter a valid IPv4 address (e.g., 192.168.1.100)</li>
+                <li>Select the CIDR prefix length (e.g., /24)</li>
+                <li>Results update automatically. Use "Copy" buttons for specific values.</li>
+            </ol>
+        </section>
+
+        <section class="tool-area">
+            <div class="subnet-inputs">
+                <div class="input-group">
+                    <label for="subnet-ip" class="input-label">IP Address</label>
+                    <input type="text" id="subnet-ip" class="text-input" placeholder="192.168.1.100" value="192.168.1.100">
+                </div>
+                <div class="input-group">
+                    <label for="subnet-cidr" class="input-label">CIDR</label>
+                    <select id="subnet-cidr" class="text-input">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <div id="subnet-error" class="error-message" style="display: none;">Invalid IPv4 address. Please check your input.</div>
+
+            <div id="subnet-results" class="subnet-results">
+                <div class="result-row">
+                    <span class="result-label">Network Address</span>
+                    <span class="result-value" id="res-network">-</span>
+                    <button class="btn-copy" data-target="res-network">Copy</button>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Broadcast Address</span>
+                    <span class="result-value" id="res-broadcast">-</span>
+                    <button class="btn-copy" data-target="res-broadcast">Copy</button>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Subnet Mask</span>
+                    <span class="result-value" id="res-mask">-</span>
+                    <button class="btn-copy" data-target="res-mask">Copy</button>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">First Usable Host</span>
+                    <span class="result-value" id="res-first">-</span>
+                    <button class="btn-copy" data-target="res-first">Copy</button>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Last Usable Host</span>
+                    <span class="result-value" id="res-last">-</span>
+                    <button class="btn-copy" data-target="res-last">Copy</button>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Total Hosts</span>
+                    <span class="result-value" id="res-total">-</span>
+                    <button class="btn-copy" data-target="res-total">Copy</button>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Usable Hosts</span>
+                    <span class="result-value" id="res-usable">-</span>
+                    <button class="btn-copy" data-target="res-usable">Copy</button>
+                </div>
+
+                <div class="binary-section">
+                    <label class="input-label">BINARY REPRESENTATION</label>
+                    <pre id="binary-output"><code></code></pre>
+                </div>
+
+                <div class="control-right" style="margin-top: 1.5rem;">
+                    <button id="copy-all-btn" class="btn btn-primary">Copy All Results</button>
+                </div
+            </div>
         </section>
     </main>
 
     <div id="footer"></div>
 
     <script src="js/common.js"></script>
+    <script src="js/subnet-calculator.js"></script>
 </body>
 </html>
