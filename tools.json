@@ -16,16 +16,16 @@
       "url": "cron-generator.html",
       "category": "devops",
       "tags": ["cron", "scheduler", "linux", "task"],
-      "status": "wip"
+      "status": "live"
     },
     {
       "id": "subnet-calculator",
       "name": "Subnet Calculator",
-      "description": "Calculate IPv4/IPv6 subnets: network address, broadcast, usable hosts, subnet mask.",
+      "description": "Calculate IPv4 subnets: network address, broadcast, usable hosts, subnet mask.",
       "url": "subnet-calculator.html",
       "category": "network",
-      "tags": ["subnet", "ipv4", "ipv6", "cidr", "networking"],
-      "status": "wip"
+      "tags": ["subnet", "ipv4", "cidr", "networking"],
+      "status": "live"
     }
   ]
 }
