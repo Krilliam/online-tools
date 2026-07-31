@@ -64,6 +64,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function updateRestoreFileSection() {
+        const cmdType = getCommandType();
+        const restoreFileSection = document.getElementById('restore-file-section');
+        if (restoreFileSection) {
+            restoreFileSection.style.display = cmdType === 'pg_restore' ? '' : 'none';
+            if (cmdType !== 'pg_restore') {
+                const checkbox = document.getElementById('opt-restore-file');
+                if (checkbox) {
+                    checkbox.checked = false;
+                    const input = document.getElementById('val-restore-file');
+                    if (input) {
+                        input.disabled = true;
+                        input.value = '';
+                    }
+                }
+            }
+        }
+    }
+
     function generateCommand() {
         const cmdType = getCommandType();
         const parts = [cmdType];
@@ -83,7 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const valEl = document.getElementById(opt.valId);
                 const value = valEl.value.trim();
                 if (value) {
-                    parts.push(`${checkbox.dataset.flag} ${value}`);
+                    // Aggiungi quotes se il valore contiene spazi
+                    const needsQuotes = value.includes(' ');
+                    parts.push(`${checkbox.dataset.flag} ${needsQuotes ? '"' + value + '"' : value}`);
                 }
             }
         });
@@ -145,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { id: 'opt-schema-only', flag: '--schema-only' },
             { id: 'opt-data-only', flag: '--data-only' },
             { id: 'opt-inserts', flag: '--inserts' },
-            { id: 'opt-verbose', flag: '--verbose' },
+            { id: 'opt-verbose', flag: '-v' },
             { id: 'opt-no-sync', flag: '--no-sync' },
             { id: 'opt-no-publications', flag: '--no-publications' },
             { id: 'opt-no-comments', flag: '--no-comments' },
@@ -161,16 +182,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // FILE PATH (ultimo argomento, senza flag)
-        // Per pg_restore: il file da ripristinare
-        // Per pg_dump: non applicabile (usa -f per il file di output)
+        // Restore file path (solo per pg_restore, ultimo argomento)
         if (cmdType === 'pg_restore') {
             const restoreFileCheckbox = document.getElementById('opt-restore-file');
             if (restoreFileCheckbox && restoreFileCheckbox.checked) {
                 const restoreFileInput = document.getElementById('val-restore-file');
                 const filePath = restoreFileInput.value.trim();
                 if (filePath) {
-                    parts.push(`"${filePath}"`);
+                    // Aggiungi quotes se il path contiene spazi
+                    const needsQuotes = filePath.includes(' ');
+                    parts.push(needsQuotes ? `"${filePath}"` : filePath);
                 }
             }
         }
@@ -179,15 +200,17 @@ document.addEventListener('DOMContentLoaded', () => {
         outputEl.textContent = parts.join(' ');
     }
 
-    // Event listeners
+    // Event listeners per tipo comando
     cmdTypeRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             updateCommandTypeSpecificOptions();
             updateVersionSpecificOptions();
+            updateRestoreFileSection();
             generateCommand();
         });
     });
 
+    // Event listener per versione
     versionSelect.addEventListener('change', () => {
         updateVersionSpecificOptions();
         generateCommand();
@@ -237,5 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial setup
     updateCommandTypeSpecificOptions();
     updateVersionSpecificOptions();
+    updateRestoreFileSection();
     generateCommand();
 });
