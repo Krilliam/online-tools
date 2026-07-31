@@ -1,4 +1,15 @@
 function injectLayout() {
+    // Aggiungi favicon dinamicamente
+    const existingFavicon = document.querySelector('link[rel="icon"]');
+    if (!existingFavicon) {
+        const favicon = document.createElement('link');
+        favicon.rel = 'icon';
+        favicon.type = 'image/x-icon';
+        favicon.href = '/favicon.ico';
+        document.head.appendChild(favicon);
+    }
+
+    // Header
     const header = document.getElementById('header');
     if (header) {
         header.innerHTML = `
@@ -9,6 +20,7 @@ function injectLayout() {
         `;
     }
 
+    // Footer
     const footer = document.getElementById('footer');
     if (footer) {
         footer.innerHTML = `
