@@ -23,7 +23,7 @@
             <ol>
                 <li>Select command type (pg_dump or pg_restore)</li>
                 <li>Choose your PostgreSQL version</li>
-                <li>Fill in the options you need</li>
+                <li>Fill in the options you need (hover over each option for a description)</li>
                 <li>The command updates automatically as you make changes</li>
                 <li>Copy the generated command to your clipboard</li>
             </ol>
@@ -34,11 +34,11 @@
             <div class="pg-section">
                 <label class="input-label">COMMAND TYPE</label>
                 <div class="radio-group">
-                    <label class="radio-label">
+                    <label class="radio-label" title="Export a PostgreSQL database to a file">
                         <input type="radio" name="cmd-type" value="pg_dump" checked>
                         <span>pg_dump</span>
                     </label>
-                    <label class="radio-label">
+                    <label class="radio-label" title="Restore a PostgreSQL database from an archive file">
                         <input type="radio" name="cmd-type" value="pg_restore">
                         <span>pg_restore</span>
                     </label>
@@ -46,7 +46,7 @@
             </div>
 
             <div class="pg-section">
-                <label for="pg-version" class="input-label">POSTGRESQL VERSION</label>
+                <label for="pg-version" class="input-label" title="Select your PostgreSQL version to show only compatible options">POSTGRESQL VERSION</label>
                 <select id="pg-version">
                     <option value="17">PostgreSQL 17</option>
                     <option value="16">PostgreSQL 16</option>
@@ -64,42 +64,42 @@
                 <label class="input-label">CONNECTION</label>
                 <div class="pg-grid">
                     <div class="pg-field">
-                        <label>
+                        <label title="Specifies the host name of the machine on which the server is running">
                             <input type="checkbox" id="opt-host" data-flag="-h" data-label="host">
                             <span>-h HOST</span>
                         </label>
                         <input type="text" id="val-host" class="pg-input" placeholder="localhost" disabled>
                     </div>
                     <div class="pg-field">
-                        <label>
+                        <label title="Specifies the TCP port or local Unix domain socket file extension on which the server is listening">
                             <input type="checkbox" id="opt-port" data-flag="-p" data-label="port">
                             <span>-p PORT</span>
                         </label>
                         <input type="text" id="val-port" class="pg-input" placeholder="5432" disabled>
                     </div>
                     <div class="pg-field">
-                        <label>
+                        <label title="User name to connect as">
                             <input type="checkbox" id="opt-user" data-flag="-U" data-label="username">
                             <span>-U USERNAME</span>
                         </label>
                         <input type="text" id="val-user" class="pg-input" placeholder="postgres" disabled>
                     </div>
                     <div class="pg-field">
-                        <label>
+                        <label title="Specifies the name of the database to connect to">
                             <input type="checkbox" id="opt-dbname" data-flag="-d" data-label="dbname">
                             <span>-d DATABASE</span>
                         </label>
                         <input type="text" id="val-dbname" class="pg-input" placeholder="mydb" disabled>
                     </div>
                     <div class="pg-field">
-                        <label>
+                        <label title="Specifies the IP address of the machine on which the server is running (numeric only, no DNS lookup)">
                             <input type="checkbox" id="opt-hostaddr" data-flag="-H" data-label="hostaddr">
                             <span>-H HOSTADDR</span>
                         </label>
                         <input type="text" id="val-hostaddr" class="pg-input" placeholder="127.0.0.1" disabled>
                     </div>
                     <div class="pg-field">
-                        <label>
+                        <label title="Never issue a password prompt. If the server requires password authentication and a password is not available, the connection will fail">
                             <input type="checkbox" id="opt-no-password">
                             <span>-w (no password prompt)</span>
                         </label>
@@ -112,7 +112,7 @@
                 <label class="input-label">FORMAT & OUTPUT</label>
                 <div class="pg-grid">
                     <div class="pg-field">
-                        <label>
+                        <label title="Selects the format of the output: c=custom, d=directory, t=tar, p=plain SQL text">
                             <input type="checkbox" id="opt-format" data-flag="-F" data-label="format">
                             <span>-F FORMAT</span>
                         </label>
@@ -124,21 +124,21 @@
                         </select>
                     </div>
                     <div class="pg-field">
-                        <label>
+                        <label title="Send output to the specified file. If omitted, the standard output is used">
                             <input type="checkbox" id="opt-file" data-flag="-f" data-label="filename">
                             <span>-f FILENAME</span>
                         </label>
                         <input type="text" id="val-file" class="pg-input" placeholder="backup.dump" disabled>
                     </div>
                     <div class="pg-field">
-                        <label>
+                        <label title="Run the most time-consuming parts in parallel using the specified number of concurrent jobs">
                             <input type="checkbox" id="opt-jobs" data-flag="-j" data-label="jobs">
                             <span>-j NJOBS (parallel)</span>
                         </label>
                         <input type="number" id="val-jobs" class="pg-input" placeholder="4" min="1" disabled>
                     </div>
                     <div class="pg-field">
-                        <label>
+                        <label title="Specify the compression level to use. Zero means no compression. Higher values mean more compression (0-9)">
                             <input type="checkbox" id="opt-compress" data-flag="-Z" data-label="compress">
                             <span>-Z LEVEL (compression)</span>
                         </label>
@@ -152,35 +152,35 @@
                 <label class="input-label">CONTENT FILTER</label>
                 <div class="pg-grid">
                     <div class="pg-field">
-                        <label>
+                        <label title="Dump only schemas matching the specified pattern. Multiple -n switches can be used">
                             <input type="checkbox" id="opt-schema" data-flag="-n" data-label="schema">
                             <span>-n SCHEMA (include)</span>
                         </label>
                         <input type="text" id="val-schema" class="pg-input" placeholder="public" disabled>
                     </div>
                     <div class="pg-field">
-                        <label>
+                        <label title="Do not dump any schemas matching the specified pattern">
                             <input type="checkbox" id="opt-exclude-schema" data-flag="-N" data-label="exclude-schema">
                             <span>-N SCHEMA (exclude)</span>
                         </label>
                         <input type="text" id="val-exclude-schema" class="pg-input" placeholder="pg_catalog" disabled>
                     </div>
                     <div class="pg-field">
-                        <label>
+                        <label title="Dump only tables matching the specified pattern. Multiple -t switches can be used">
                             <input type="checkbox" id="opt-table" data-flag="-t" data-label="table">
                             <span>-t TABLE (include)</span>
                         </label>
                         <input type="text" id="val-table" class="pg-input" placeholder="users" disabled>
                     </div>
                     <div class="pg-field">
-                        <label>
+                        <label title="Do not dump any tables matching the specified pattern">
                             <input type="checkbox" id="opt-exclude-table" data-flag="-T" data-label="exclude-table">
                             <span>-T TABLE (exclude)</span>
                         </label>
                         <input type="text" id="val-exclude-table" class="pg-input" placeholder="logs" disabled>
                     </div>
                     <div class="pg-field version-specific" data-min-version="17">
-                        <label>
+                        <label title="Read include/exclude patterns from a file, one per line (PG 17+)">
                             <input type="checkbox" id="opt-filter" data-flag="--filter" data-label="filter-file">
                             <span>--filter=FILE (PG 17+)</span>
                         </label>
@@ -193,75 +193,77 @@
             <div class="pg-section">
                 <label class="input-label">BEHAVIOR</label>
                 <div class="pg-checkboxes">
-                    <label class="checkbox-label">
+                    <label class="checkbox-label" title="Clean (drop) database objects before recreating them during restore">
                         <input type="checkbox" id="opt-clean">
                         <span>-c (clean before restore)</span>
                     </label>
-                    <label class="checkbox-label">
+                    <label class="checkbox-label" title="Create the database before restoring into it. Implies --clean if used with pg_restore">
                         <input type="checkbox" id="opt-create">
                         <span>-C (create database)</span>
                     </label>
-                    <label class="checkbox-label">
+                    <label class="checkbox-label" title="Do not output commands to set ownership of objects to match the original database">
                         <input type="checkbox" id="opt-no-owner">
                         <span>-O (no owner)</span>
                     </label>
-                    <label class="checkbox-label">
+                    <label class="checkbox-label" title="Do not dump or restore access privileges (grant/revoke commands)">
                         <input type="checkbox" id="opt-no-privileges">
                         <span>-x (no privileges)</span>
                     </label>
-                    <label class="checkbox-label">
+                    <label class="checkbox-label" title="Dump only the object definitions (schema), not data">
                         <input type="checkbox" id="opt-schema-only">
                         <span>--schema-only</span>
                     </label>
-                    <label class="checkbox-label">
+                    <label class="checkbox-label" title="Dump only the data, not the schema (object definitions)">
                         <input type="checkbox" id="opt-data-only">
                         <span>--data-only</span>
                     </label>
-                    <label class="checkbox-label">
+                    <label class="checkbox-label" title="Dump data as INSERT commands rather than COPY commands. Slower but more portable">
                         <input type="checkbox" id="opt-inserts">
                         <span>--inserts</span>
                     </label>
-                    <label class="checkbox-label">
+                    <label class="checkbox-label" title="Print detailed progress messages to standard error during the operation">
                         <input type="checkbox" id="opt-verbose">
-                        <span>--verbose</span>
+                        <span>-v (verbose)</span>
                     </label>
-                    <label class="checkbox-label version-specific" data-min-version="10">
+                    <label class="checkbox-label version-specific" data-min-version="10" title="Do not wait for files to be safely written to disk. Faster but risky in case of OS crash (PG 10+)">
                         <input type="checkbox" id="opt-no-sync">
                         <span>--no-sync (PG 10+)</span>
                     </label>
-                    <label class="checkbox-label version-specific" data-min-version="11">
+                    <label class="checkbox-label version-specific" data-min-version="11" title="Do not dump publications (logical replication) (PG 11+)">
                         <input type="checkbox" id="opt-no-publications">
                         <span>--no-publications (PG 11+)</span>
                     </label>
-                    <label class="checkbox-label version-specific" data-min-version="12">
+                    <label class="checkbox-label version-specific" data-min-version="12" title="Do not dump comments on database objects (PG 12+)">
                         <input type="checkbox" id="opt-no-comments">
                         <span>--no-comments (PG 12+)</span>
                     </label>
-                    <label class="checkbox-label version-specific" data-min-version="13">
+                    <label class="checkbox-label version-specific" data-min-version="13" title="Do not dump passwords for roles. Useful when restoring to a cluster with different authentication (PG 13+)">
                         <input type="checkbox" id="opt-no-role-passwords">
                         <span>--no-role-passwords (PG 13+)</span>
                     </label>
-                    <label class="checkbox-label version-specific" data-min-version="14">
+                    <label class="checkbox-label version-specific" data-min-version="14" title="Do not dump TOAST compression settings for columns (PG 14+)">
                         <input type="checkbox" id="opt-no-toast-compression">
                         <span>--no-toast-compression (PG 14+)</span>
                     </label>
-                    <label class="checkbox-label version-specific" data-min-version="15">
+                    <label class="checkbox-label version-specific" data-min-version="15" title="Do not dump the contents of unlogged tables (PG 15+)">
                         <input type="checkbox" id="opt-no-unlogged-table-data">
                         <span>--no-unlogged-table-data (PG 15+)</span>
                     </label>
                 </div>
             </div>
-    <!-- Restore File (solo per pg_restore) -->
-    <div class="pg-section" id="restore-file-section" style="display: none;">
-        <label class="input-label">RESTORE FILE</label>
-        <div class="pg-field">
-            <label>
-                <input type="checkbox" id="opt-restore-file">
-                <span>File path (ultimo argomento)</span>
-            </label>
-            <input type="text" id="val-restore-file" class="pg-input" placeholder="/home/user/backup.dump" disabled>
-        </div>
-    </div>
+
+            <!-- Restore File (solo per pg_restore) -->
+            <div class="pg-section" id="restore-file-section" style="display: none;">
+                <label class="input-label">RESTORE FILE</label>
+                <div class="pg-field">
+                    <label title="Path to the archive file created by pg_dump to be restored. This is the last argument of the command">
+                        <input type="checkbox" id="opt-restore-file">
+                        <span>File path (last argument)</span>
+                    </label>
+                    <input type="text" id="val-restore-file" class="pg-input" placeholder="/home/user/backup.dump" disabled>
+                </div>
+            </div>
+
             <!-- Generated Command -->
             <div class="pg-section">
                 <label class="input-label">GENERATED COMMAND</label>
