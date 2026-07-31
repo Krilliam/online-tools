@@ -608,3 +608,124 @@ pre code {
         margin-top: 0.25rem;
     }
 }
+
+/* PostgreSQL Command Builder Specifics */
+.pg-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-card);
+}
+
+.pg-section:last-child {
+    border-bottom: none;
+}
+
+.radio-group {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.radio-label input[type="radio"] {
+    cursor: pointer;
+}
+
+.pg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.pg-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.pg-field label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9375rem;
+}
+
+.pg-field label input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.pg-input {
+    padding: 0.5rem;
+    border: 1px solid var(--border-card);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    background-color: var(--bg-page);
+    transition: border-color 0.2s;
+}
+
+.pg-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background-color: var(--bg-card);
+}
+
+.pg-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pg-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9375rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.version-specific {
+    position: relative;
+}
+
+.version-specific::after {
+    content: "version-specific";
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    background-color: var(--bg-output);
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+}
+
+@media (max-width: 768px) {
+    .pg-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .radio-group {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
