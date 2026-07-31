@@ -15,15 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
     ]);
 
     // =============================================
-    // 1. ESTRAE MAPPA: identifica tabelle, schemi e alias
+    // 1. ESTRAE MAPPA: identifica tabelle, schemi, alias e tabella principale
     // =============================================
     function extractTableMap(sql) {
         const map = {};
+        let mainAlias = null;
+        let mainTableFound = false;
         
         const pattern = /\b(FROM|JOIN)\s+(?:(\w+)\.)?(\w+)(?:\s+(?:AS\s+)?(\w+))?/gi;
         let match;
         
         while ((match = pattern.exec(sql)) !== null) {
+            const keyword = match[1].toUpperCase();
             const tableName = match[3];
             let alias = match[4];
 
@@ -37,9 +40,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (alias) {
                 map[alias] = identifierToUse;
             }
+
+            // La prima FROM (non JOIN) definisce la tabella principale
+            if (keyword === 'FROM' && !mainTableFound) {
+                mainAlias = identifierToUse;
+                mainTableFound = true;
+            }
         }
         
-        return { map };
+        return { map, mainAlias };
     }
 
     // =============================================
@@ -60,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // =============================================
     // 3. CONVERTI RIFERIMENTI A COLONNE (inclusi schemi)
-    // FIX: rimosso \b finale che falliva con *
     // =============================================
     function convertColumns(sql, tableMap) {
         return sql.replace(/\b([a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)\.(\w+|\*)/g, (match, prefixChain, column) => {
@@ -77,17 +85,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // =============================================
     // 4. CONVERTI ASTERISCO STANDALONE (*)
-    // FIX: rimosso \b finale dopo *
+    // Usa la tabella principale (prima FROM) come riferimento
     // =============================================
-    function convertStandaloneStar(sql, tableMap) {
-        const aliases = Object.values(tableMap.map);
-        const uniqueAliases = [...new Set(aliases)];
+    function convertStandaloneStar(sql, tableMap, mainAlias) {
+        if (!mainAlias) return sql;
         
-        if (uniqueAliases.length === 1) {
-            const alias = uniqueAliases[0];
-            sql = sql.replace(/\b(SELECT\s+)\*/gi, `$1JXCOL(${alias}:*)`);
-            sql = sql.replace(/,\s*\*/g, `, JXCOL(${alias}:*)`);
-        }
+        // Sostituisce "SELECT *"
+        sql = sql.replace(/\b(SELECT\s+)\*/gi, `$1JXCOL(${mainAlias}:*)`);
+        // Sostituisce ", *" (es. SELECT col1, *)
+        sql = sql.replace(/,\s*\*/g, `, JXCOL(${mainAlias}:*)`);
+        
         return sql;
     }
 
@@ -155,10 +162,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // =============================================
     function convertToJXSQL(sql, dialect) {
         const { protected_sql, strings } = protectStrings(sql);
-        const { map } = extractTableMap(protected_sql);
+        const { map, mainAlias } = extractTableMap(protected_sql);
         
         let result = convertColumns(protected_sql, { map });
-        result = convertStandaloneStar(result, { map });
+        result = convertStandaloneStar(result, { map }, mainAlias);
         result = convertTables(result);
         result = convertConcat(result, dialect);
         result = convertSubstring(result, dialect);
