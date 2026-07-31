@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.style.display = '';
             } else {
                 el.style.display = 'none';
-                // Deseleziona le checkbox nascoste
                 const checkbox = el.querySelector('input[type="checkbox"]');
                 if (checkbox) checkbox.checked = false;
                 const input = el.querySelector('input[type="text"], input[type="number"], select');
@@ -94,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
             parts.push('-w');
         }
 
-        // Format & Output
+        // Format & Output (incluso -j per entrambi i comandi)
         const formatOpts = [
             { id: 'opt-format', valId: 'val-format' },
             { id: 'opt-file', valId: 'val-file' },
@@ -162,7 +161,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        outputEl.textContent = parts.join(' \\\n  ');
+        // FILE PATH (ultimo argomento, senza flag)
+        // Per pg_restore: il file da ripristinare
+        // Per pg_dump: non applicabile (usa -f per il file di output)
+        if (cmdType === 'pg_restore') {
+            const restoreFileCheckbox = document.getElementById('opt-restore-file');
+            if (restoreFileCheckbox && restoreFileCheckbox.checked) {
+                const restoreFileInput = document.getElementById('val-restore-file');
+                const filePath = restoreFileInput.value.trim();
+                if (filePath) {
+                    parts.push(`"${filePath}"`);
+                }
+            }
+        }
+
+        // Output su SINGOLA RIGA
+        outputEl.textContent = parts.join(' ');
     }
 
     // Event listeners
