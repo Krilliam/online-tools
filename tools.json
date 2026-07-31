@@ -19,6 +19,15 @@
       "status": "live"
     },
     {
+      "id": "pg-command-builder",
+      "name": "PostgreSQL Command Builder",
+      "description": "Build pg_dump and pg_restore commands visually with version-specific options (PG 10-17).",
+      "url": "pg-command-builder.html",
+      "category": "database",
+      "tags": ["postgresql", "pg_dump", "pg_restore", "backup", "database", "devops"],
+      "status": "live"
+    },
+    {
       "id": "cron-generator",
       "name": "Cron Generator",
       "description": "Visual interface to build cron expressions with preview of next executions.",
