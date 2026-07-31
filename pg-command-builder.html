@@ -251,7 +251,17 @@
                     </label>
                 </div>
             </div>
-
+    <!-- Restore File (solo per pg_restore) -->
+    <div class="pg-section" id="restore-file-section" style="display: none;">
+        <label class="input-label">RESTORE FILE</label>
+        <div class="pg-field">
+            <label>
+                <input type="checkbox" id="opt-restore-file">
+                <span>File path (ultimo argomento)</span>
+            </label>
+            <input type="text" id="val-restore-file" class="pg-input" placeholder="/home/user/backup.dump" disabled>
+        </div>
+    </div>
             <!-- Generated Command -->
             <div class="pg-section">
                 <label class="input-label">GENERATED COMMAND</label>
