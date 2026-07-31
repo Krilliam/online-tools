@@ -15,34 +15,38 @@ document.addEventListener('DOMContentLoaded', () => {
     ]);
 
     // =============================================
-    // 1. ESTRAE MAPPA ALIAS -> NOME TABELLA
+    // 1. ESTRAE MAPPA: identifica tabelle, schemi e alias
     // =============================================
     function extractTableMap(sql) {
-        const map = {};          // alias -> tableName
-        const noAliasTables = []; // tabelle senza alias
+        const map = {}; // Mappa: qualsiasi identificatore (alias o nome tabella) -> alias da usare in JXCOL
         
-        // Pattern: FROM/JOIN tablename [AS] [alias]
-        // L'alias NON deve essere una keyword SQL successiva (WHERE, ON, JOIN, ecc.)
-        const pattern = /\b(FROM|JOIN)\s+(\w+)(?:\s+(?:AS\s+)?(\w+))?/gi;
+        // Regex: FROM/JOIN [opzionale: schema.] tableName [AS] [alias]
+        // Gruppo 1: FROM/JOIN
+        // Gruppo 2: (opzionale) schema
+        // Gruppo 3: nome tabella
+        // Gruppo 4: (opzionale) alias
+        const pattern = /\b(FROM|JOIN)\s+(?:(\w+)\.)?(\w+)(?:\s+(?:AS\s+)?(\w+))?/gi;
         let match;
+        
         while ((match = pattern.exec(sql)) !== null) {
-            const tableName = match[2];
-            let alias = match[3];
-            
+            const tableName = match[3];
+            let alias = match[4];
+
+            // Se l'alias è in realtà una keyword SQL (es. FROM tabella WHERE...), lo ignoriamo
             if (alias && SQL_KEYWORDS.has(alias.toUpperCase())) {
                 alias = null;
             }
+
+            const identifierToUse = alias || tableName;
             
+            // Mappiamo sia il nome della tabella che l'alias all'identificatore finale da usare
+            map[tableName] = identifierToUse;
             if (alias) {
-                map[alias] = tableName;
-            } else {
-                // Tabella senza alias: useremo il nome della tabella come "alias" nelle JXCOL
-                map[tableName] = tableName;
-                noAliasTables.push(tableName);
+                map[alias] = identifierToUse;
             }
         }
         
-        return { map, noAliasTables };
+        return { map };
     }
 
     // =============================================
@@ -62,27 +66,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =============================================
-    // 3. CONVERTI RIFERIMENTI A COLONNE
+    // 3. CONVERTI RIFERIMENTI A COLONNE (inclusi schemi)
     // =============================================
     function convertColumns(sql, tableMap) {
-        // Pattern: alias.colonna -> JXCOL(alias:colonna)
-        // Gestisce anche alias.* -> JXCOL(alias:*)
-        return sql.replace(/\b([a-zA-Z_]\w*)\.(\w+|\*)\b/g, (match, prefix, column) => {
-            // Se il prefisso è un alias noto o un nome di tabella noto
-            if (tableMap.map[prefix] !== undefined) {
-                return `JXCOL(${prefix}:${column})`;
+        // Match: [schema.]table_or_alias.column_or_star
+        return sql.replace(/\b([a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)\.(\w+|\*)\b/g, (match, prefixChain, column) => {
+            const parts = prefixChain.split('.');
+            const lastPart = parts[parts.length - 1]; // L'ultima parte è la tabella o l'alias
+            
+            // Se l'ultima parte è riconosciuta come tabella o alias nella nostra mappa
+            if (tableMap.map[lastPart] !== undefined) {
+                return `JXCOL(${tableMap.map[lastPart]}:${column})`;
             }
-            // Altrimenti lascia stare (potrebbe essere schema.tabella o altro)
-            return match;
+            
+            return match; // Se non riconosciuto, lascia invariato
         });
     }
 
     // =============================================
-    // 4. CONVERTI RIFERIMENTI A TABELLE
+    // 4. CONVERTI ASTERISCO STANDALONE (*)
+    // =============================================
+    function convertStandaloneStar(sql, tableMap) {
+        const aliases = Object.values(tableMap.map);
+        const uniqueAliases = [...new Set(aliases)];
+        
+        // Se c'è una sola tabella/alias nella query, possiamo assumere che * si riferisca a quello
+        if (uniqueAliases.length === 1) {
+            const alias = uniqueAliases[0];
+            // Sostituisce "SELECT *"
+            sql = sql.replace(/\b(SELECT\s+)\*\b/gi, `$1JXCOL(${alias}:*)`);
+            // Sostituisce ", *" (es. SELECT col1, *)
+            sql = sql.replace(/,\s*\*/g, `, JXCOL(${alias}:*)`);
+        }
+        return sql;
+    }
+
+    // =============================================
+    // 5. CONVERTI RIFERIMENTI A TABELLE (ignorando lo schema)
     // =============================================
     function convertTables(sql) {
-        return sql.replace(/\b(FROM|JOIN)\s+(\w+)(?:\s+(?:AS\s+)?(\w+))?/gi, 
-            (match, keyword, tableName, alias) => {
+        return sql.replace(/\b(FROM|JOIN)\s+(?:(\w+)\.)?(\w+)(?:\s+(?:AS\s+)?(\w+))?/gi, 
+            (match, keyword, schema, tableName, alias) => {
                 if (alias && SQL_KEYWORDS.has(alias.toUpperCase())) {
                     alias = null;
                 }
@@ -96,11 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =============================================
-    // 5. CONVERTI CONCATENAZIONI IN JXCONCAT
+    // 6. CONVERTI CONCATENAZIONI IN JXCONCAT
     // =============================================
     function convertConcat(sql, dialect) {
         const operator = dialect === 'postgresql' ? '\\|\\|' : '\\+';
-        // Match: JXCOL(...) OP JXCOL(...) OP JXCOL(...) ...
         const regex = new RegExp(
             `(JXCOL\\([^)]+\\))(?:\\s*${operator}\\s*(JXCOL\\([^)]+\\)|'[^']*'|\\"[^"]*\\"|\\d+))+`,
             'g'
@@ -113,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =============================================
-    // 6. CONVERTI SUBSTRING IN JXSUBSTRING
+    // 7. CONVERTI SUBSTRING IN JXSUBSTRING
     // =============================================
     function convertSubstring(sql, dialect) {
         let result = sql;
@@ -146,22 +169,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // Step 0: Proteggi le stringhe letterali
         const { protected_sql, strings } = protectStrings(sql);
         
-        // Step 1: Estrai mappa alias/tabelle
+        // Step 1: Estrai mappa tabelle/alias
         const { map } = extractTableMap(protected_sql);
         
-        // Step 2: Converti colonne (PRIMA delle tabelle, così preserviamo alias.col)
+        // Step 2: Converti colonne (gestisce anche schema.tabella.colonna)
         let result = convertColumns(protected_sql, { map });
         
-        // Step 3: Converti tabelle (FROM/JOIN)
+        // Step 3: Converti asterisco standalone (*) se c'è una sola tabella
+        result = convertStandaloneStar(result, { map });
+        
+        // Step 4: Converti tabelle (ignora lo schema, usa solo tabella e alias)
         result = convertTables(result);
         
-        // Step 4: Converti concatenazioni
+        // Step 5: Converti concatenazioni
         result = convertConcat(result, dialect);
         
-        // Step 5: Converti substring
+        // Step 6: Converti substring
         result = convertSubstring(result, dialect);
         
-        // Step 6: Ripristina stringhe letterali
+        // Step 7: Ripristina stringhe letterali
         result = restoreStrings(result, strings);
         
         return result;
