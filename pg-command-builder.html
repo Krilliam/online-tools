@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostgreSQL Command Builder - Online Tools</title>
+    <meta name="description" content="Build pg_dump and pg_restore commands with visual interface. Supports PostgreSQL 10-17. Free, no login.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>PostgreSQL Command Builder</h1>
+            <p>Build pg_dump and pg_restore commands visually with version-specific options.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Select command type (pg_dump or pg_restore)</li>
+                <li>Choose your PostgreSQL version</li>
+                <li>Fill in the options you need</li>
+                <li>The command updates automatically as you make changes</li>
+                <li>Copy the generated command to your clipboard</li>
+            </ol>
+        </section>
+
+        <section class="tool-area">
+            <!-- Command Type & Version -->
+            <div class="pg-section">
+                <label class="input-label">COMMAND TYPE</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="cmd-type" value="pg_dump" checked>
+                        <span>pg_dump</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="cmd-type" value="pg_restore">
+                        <span>pg_restore</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="pg-section">
+                <label for="pg-version" class="input-label">POSTGRESQL VERSION</label>
+                <select id="pg-version">
+                    <option value="17">PostgreSQL 17</option>
+                    <option value="16">PostgreSQL 16</option>
+                    <option value="15">PostgreSQL 15</option>
+                    <option value="14">PostgreSQL 14</option>
+                    <option value="13">PostgreSQL 13</option>
+                    <option value="12">PostgreSQL 12</option>
+                    <option value="11">PostgreSQL 11</option>
+                    <option value="10">PostgreSQL 10</option>
+                </select>
+            </div>
+
+            <!-- Connection Options -->
+            <div class="pg-section">
+                <label class="input-label">CONNECTION</label>
+                <div class="pg-grid">
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-host" data-flag="-h" data-label="host">
+                            <span>-h HOST</span>
+                        </label>
+                        <input type="text" id="val-host" class="pg-input" placeholder="localhost" disabled>
+                    </div>
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-port" data-flag="-p" data-label="port">
+                            <span>-p PORT</span>
+                        </label>
+                        <input type="text" id="val-port" class="pg-input" placeholder="5432" disabled>
+                    </div>
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-user" data-flag="-U" data-label="username">
+                            <span>-U USERNAME</span>
+                        </label>
+                        <input type="text" id="val-user" class="pg-input" placeholder="postgres" disabled>
+                    </div>
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-dbname" data-flag="-d" data-label="dbname">
+                            <span>-d DATABASE</span>
+                        </label>
+                        <input type="text" id="val-dbname" class="pg-input" placeholder="mydb" disabled>
+                    </div>
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-hostaddr" data-flag="-H" data-label="hostaddr">
+                            <span>-H HOSTADDR</span>
+                        </label>
+                        <input type="text" id="val-hostaddr" class="pg-input" placeholder="127.0.0.1" disabled>
+                    </div>
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-no-password">
+                            <span>-w (no password prompt)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Format & Output -->
+            <div class="pg-section">
+                <label class="input-label">FORMAT & OUTPUT</label>
+                <div class="pg-grid">
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-format" data-flag="-F" data-label="format">
+                            <span>-F FORMAT</span>
+                        </label>
+                        <select id="val-format" class="pg-input" disabled>
+                            <option value="c">c (custom)</option>
+                            <option value="d">d (directory)</option>
+                            <option value="t">t (tar)</option>
+                            <option value="p">p (plain text)</option>
+                        </select>
+                    </div>
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-file" data-flag="-f" data-label="filename">
+                            <span>-f FILENAME</span>
+                        </label>
+                        <input type="text" id="val-file" class="pg-input" placeholder="backup.dump" disabled>
+                    </div>
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-jobs" data-flag="-j" data-label="jobs">
+                            <span>-j NJOBS (parallel)</span>
+                        </label>
+                        <input type="number" id="val-jobs" class="pg-input" placeholder="4" min="1" disabled>
+                    </div>
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-compress" data-flag="-Z" data-label="compress">
+                            <span>-Z LEVEL (compression)</span>
+                        </label>
+                        <input type="number" id="val-compress" class="pg-input" placeholder="6" min="0" max="9" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Filter -->
+            <div class="pg-section">
+                <label class="input-label">CONTENT FILTER</label>
+                <div class="pg-grid">
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-schema" data-flag="-n" data-label="schema">
+                            <span>-n SCHEMA (include)</span>
+                        </label>
+                        <input type="text" id="val-schema" class="pg-input" placeholder="public" disabled>
+                    </div>
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-exclude-schema" data-flag="-N" data-label="exclude-schema">
+                            <span>-N SCHEMA (exclude)</span>
+                        </label>
+                        <input type="text" id="val-exclude-schema" class="pg-input" placeholder="pg_catalog" disabled>
+                    </div>
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-table" data-flag="-t" data-label="table">
+                            <span>-t TABLE (include)</span>
+                        </label>
+                        <input type="text" id="val-table" class="pg-input" placeholder="users" disabled>
+                    </div>
+                    <div class="pg-field">
+                        <label>
+                            <input type="checkbox" id="opt-exclude-table" data-flag="-T" data-label="exclude-table">
+                            <span>-T TABLE (exclude)</span>
+                        </label>
+                        <input type="text" id="val-exclude-table" class="pg-input" placeholder="logs" disabled>
+                    </div>
+                    <div class="pg-field version-specific" data-min-version="17">
+                        <label>
+                            <input type="checkbox" id="opt-filter" data-flag="--filter" data-label="filter-file">
+                            <span>--filter=FILE (PG 17+)</span>
+                        </label>
+                        <input type="text" id="val-filter" class="pg-input" placeholder="filter.txt" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Behavior Options -->
+            <div class="pg-section">
+                <label class="input-label">BEHAVIOR</label>
+                <div class="pg-checkboxes">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="opt-clean">
+                        <span>-c (clean before restore)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="opt-create">
+                        <span>-C (create database)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="opt-no-owner">
+                        <span>-O (no owner)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="opt-no-privileges">
+                        <span>-x (no privileges)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="opt-schema-only">
+                        <span>--schema-only</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="opt-data-only">
+                        <span>--data-only</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="opt-inserts">
+                        <span>--inserts</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="opt-verbose">
+                        <span>--verbose</span>
+                    </label>
+                    <label class="checkbox-label version-specific" data-min-version="10">
+                        <input type="checkbox" id="opt-no-sync">
+                        <span>--no-sync (PG 10+)</span>
+                    </label>
+                    <label class="checkbox-label version-specific" data-min-version="11">
+                        <input type="checkbox" id="opt-no-publications">
+                        <span>--no-publications (PG 11+)</span>
+                    </label>
+                    <label class="checkbox-label version-specific" data-min-version="12">
+                        <input type="checkbox" id="opt-no-comments">
+                        <span>--no-comments (PG 12+)</span>
+                    </label>
+                    <label class="checkbox-label version-specific" data-min-version="13">
+                        <input type="checkbox" id="opt-no-role-passwords">
+                        <span>--no-role-passwords (PG 13+)</span>
+                    </label>
+                    <label class="checkbox-label version-specific" data-min-version="14">
+                        <input type="checkbox" id="opt-no-toast-compression">
+                        <span>--no-toast-compression (PG 14+)</span>
+                    </label>
+                    <label class="checkbox-label version-specific" data-min-version="15">
+                        <input type="checkbox" id="opt-no-unlogged-table-data">
+                        <span>--no-unlogged-table-data (PG 15+)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Generated Command -->
+            <div class="pg-section">
+                <label class="input-label">GENERATED COMMAND</label>
+                <pre id="pg-output"><code>pg_dump</code></pre>
+                <div class="control-right" style="margin-top: 1rem;">
+                    <button id="copy-cmd-btn" class="btn btn-primary">Copy Command</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/pg-command-builder.js"></script>
+</body>
+</html>
