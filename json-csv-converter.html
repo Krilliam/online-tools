@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSON ↔ CSV Converter - Online Tools</title>
-    <meta name="description" content="Convert JSON to CSV and CSV to JSON instantly. Handles nested data, quotes, and custom delimiters. Free, client-side.">
+    <meta name="description" content="Convert JSON to CSV and CSV to JSON instantly. Handles nested data, quotes, custom delimiters, and header options. Free, client-side.">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -22,7 +22,8 @@
             <h2>How to use</h2>
             <ol>
                 <li>Paste your JSON array or CSV data into the Input field</li>
-                <li>Select the conversion direction and delimiter (if converting to CSV)</li>
+                <li><strong>For CSV to JSON:</strong> Ensure "First row contains headers" is checked if your CSV has column names. If unchecked, generic keys (col1, col2...) will be generated.</li>
+                <li>Select the conversion direction and CSV delimiter</li>
                 <li>Click "Convert" (or it updates automatically)</li>
                 <li>Use "Copy" to copy the result or "Download" to save as a file</li>
             </ol>
@@ -46,6 +47,13 @@
                         <option value="	">Tab (\t)</option>
                         <option value="|">Pipe (|)</option>
                     </select>
+                </div>
+                <div class="pg-field" id="csv-options-field" style="display: none;">
+                    <label class="input-label">CSV OPTIONS</label>
+                    <label class="checkbox-label" style="margin-top: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="csv-has-header" checked>
+                        <span>First row contains headers</span>
+                    </label>
                 </div>
             </div>
 
