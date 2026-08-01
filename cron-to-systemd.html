@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crontab to Systemd Timer Converter - Online Tools</title>
+    <meta name="description" content="Convert crontab entries to systemd .service and .timer files instantly. Free, client-side, no login.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>Crontab to Systemd Timer Converter</h1>
+            <p>Translate legacy crontab entries into modern, robust systemd .service and .timer units.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Enter a name for your task (e.g., <code>backup-db</code>)</li>
+                <li>Paste your existing crontab schedule (e.g., <code>0 2 * * *</code>) or use <code>@reboot</code></li>
+                <li>Provide the absolute path to the command or script to execute</li>
+                <li>Specify the user that should run the task</li>
+                <li>Copy the generated files and follow the installation instructions</li>
+            </ol>
+        </section>
+
+        <section class="tool-area">
+            <div class="pg-grid">
+                <div class="pg-field">
+                    <label for="task-name" class="input-label">Task Name (no spaces)</label>
+                    <input type="text" id="task-name" class="pg-input" placeholder="backup-db" value="mytask">
+                </div>
+                <div class="pg-field">
+                    <label for="cron-expr" class="input-label">Cron Expression</label>
+                    <input type="text" id="cron-expr" class="pg-input" placeholder="0 2 * * *" value="0 2 * * *">
+                    <small style="color: var(--text-secondary); font-size: 0.8rem;">Supports standard 5-field cron or @reboot</small>
+                </div>
+                <div class="pg-field">
+                    <label for="exec-cmd" class="input-label">Command / Script Path</label>
+                    <input type="text" id="exec-cmd" class="pg-input" placeholder="/usr/local/bin/script.sh" value="/usr/local/bin/backup.sh">
+                </div>
+                <div class="pg-field">
+                    <label for="exec-user" class="input-label">Run as User</label>
+                    <input type="text" id="exec-user" class="pg-input" placeholder="root" value="root">
+                </div>
+            </div>
+
+            <div id="systemd-output" style="margin-top: 2rem;">
+                <label class="input-label">1. SERVICE FILE (<span id="filename-service">mytask.service</span>)</label>
+                <pre id="output-service"><code></code></pre>
+                
+                <label class="input-label" style="margin-top: 1.5rem;">2. TIMER FILE (<span id="filename-timer">mytask.timer</span>)</label>
+                <pre id="output-timer"><code></code></pre>
+
+                <label class="input-label" style="margin-top: 1.5rem;">3. INSTALLATION COMMANDS</label>
+                <pre id="output-install"><code></code></pre>
+            </div>
+
+            <div class="control-right" style="margin-top: 1.5rem;">
+                <button id="copy-all-btn" class="btn btn-primary">Copy All</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/cron-to-systemd.js"></script>
+</body>
+</html>
