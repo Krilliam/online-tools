@@ -62,6 +62,15 @@
       "category": "devops",
       "tags": ["json", "csv", "converter", "data", "parser", "devops"],
       "status": "live"
+    },
+    {
+      "id": "url-encoder",
+      "name": "URL Encoder / Decoder",
+      "description": "Encode or decode URLs, query strings, and form data with UTF-8 support and batch processing.",
+      "url": "url-encoder.html",
+      "category": "devops",
+      "tags": ["url", "encode", "decode", "uri", "percent-encoding", "query-string", "devops"],
+      "status": "live"
     }
   ]
 }
