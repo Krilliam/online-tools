@@ -44,6 +44,15 @@
       "category": "network",
       "tags": ["subnet", "ipv4", "cidr", "networking"],
       "status": "live"
+    },
+    {
+      "id": "cron-to-systemd",
+      "name": "Crontab to Systemd Converter",
+      "description": "Convert legacy crontab entries into modern systemd .service and .timer units instantly.",
+      "url": "cron-to-systemd.html",
+      "category": "devops",
+      "tags": ["cron", "systemd", "linux", "timer", "cronjob", "devops"],
+      "status": "live"
     }
   ]
 }
