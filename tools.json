@@ -71,6 +71,15 @@
       "category": "devops",
       "tags": ["url", "encode", "decode", "uri", "percent-encoding", "query-string", "devops"],
       "status": "live"
+    },
+    {
+      "id": "html-decoder",
+      "name": "HTML Entity Decoder",
+      "description": "Clean up text by converting HTML entities (&quot;, &amp;, &lt;) back to normal characters.",
+      "url": "html-decoder.html",
+      "category": "devops",
+      "tags": ["html", "decoder", "entities", "quot", "amp", "clean", "devops"],
+      "status": "live"
     }
   ]
 }
