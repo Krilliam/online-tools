@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Encoder / Decoder - Online Tools</title>
+    <meta name="description" content="Encode or decode URLs, query strings, and form data. Handles UTF-8 correctly. Free, client-side, no login.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>URL Encoder / Decoder</h1>
+            <p>Encode or decode URLs, query strings, and form data with proper UTF-8 support.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Select the operation (Encode or Decode)</li>
+                <li>Choose the encoding mode based on your use case</li>
+                <li>Paste your text in the Input field</li>
+                <li>The result appears automatically in the Output field</li>
+                <li>Use "Copy" or "Download" to save the result</li>
+            </ol>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                <strong>Tip:</strong> Enable "Process line by line" to encode/decode multiple URLs at once.
+            </p>
+        </section>
+
+        <section class="tool-area">
+            <!-- Controls -->
+            <div class="pg-grid" style="margin-bottom: 1.5rem;">
+                <div class="pg-field">
+                    <label class="input-label">OPERATION</label>
+                    <select id="operation-mode" class="pg-input">
+                        <option value="encode">Encode</option>
+                        <option value="decode">Decode</option>
+                    </select>
+                </div>
+                <div class="pg-field">
+                    <label class="input-label">ENCODING MODE</label>
+                    <select id="encoding-mode" class="pg-input">
+                        <option value="component">URL Component (RFC 3986)</option>
+                        <option value="full">Full URL (preserves :/?#[]@)</option>
+                        <option value="form">Form URL-encoded (spaces as +)</option>
+                    </select>
+                </div>
+                <div class="pg-field">
+                    <label class="input-label">PROCESSING</label>
+                    <label class="checkbox-label" style="margin-top: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="line-by-line">
+                        <span>Process line by line (batch mode)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Input / Output Grid -->
+            <div class="pg-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div>
+                    <label for="input-data" class="input-label">INPUT</label>
+                    <textarea id="input-data" rows="15" class="pg-input" style="resize: vertical; font-family: var(--font-mono);" placeholder="https://example.com/path?name=John Doe&city=New York"></textarea>
+                    <div class="control-right" style="margin-top: 0.5rem;">
+                        <button id="clear-btn" class="btn btn-secondary">Clear</button>
+                        <button id="swap-btn" class="btn btn-secondary">Swap ⇄</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="output-data" class="input-label">OUTPUT</label>
+                    <textarea id="output-data" rows="15" class="pg-input" readonly style="resize: vertical; font-family: var(--font-mono); background-color: var(--bg-output);"></textarea>
+                    <div class="control-right" style="margin-top: 0.5rem;">
+                        <button id="copy-btn" class="btn btn-secondary">Copy</button>
+                        <button id="download-btn" class="btn btn-secondary">Download</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error-message" style="display: none; margin-top: 1rem; padding: 1rem; background-color: #fee2e2; color: #b91c1c; border-radius: 6px; border: 1px solid #fecaca;"></div>
+
+            <!-- Info Box -->
+            <div style="margin-top: 2rem; padding: 1rem; background-color: var(--bg-output); border-radius: 6px; font-size: 0.875rem; color: var(--text-secondary);">
+                <strong>Encoding modes explained:</strong>
+                <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                    <li><strong>URL Component:</strong> Encodes everything except <code>A-Z a-z 0-9 - _ . ! ~ * ' ( )</code>. Best for query parameters.</li>
+                    <li><strong>Full URL:</strong> Preserves structural characters like <code>:/?#[]@</code>. Best for complete URLs.</li>
+                    <li><strong>Form URL-encoded:</strong> Spaces become <code>+</code> instead of <code>%20</code>. Used in HTML form submissions.</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/url-encoder.js"></script>
+</body>
+</html>
