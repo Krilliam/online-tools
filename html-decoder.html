@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Entity Decoder - Online Tools</title>
+    <meta name="description" content="Decode HTML entities like &quot;, &amp;, &lt;, &gt; back to normal characters instantly. Free, client-side.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>HTML Entity Decoder</h1>
+            <p>Clean up text by converting HTML entities (&quot;, &amp;, &lt;, &gt;) back to normal characters.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Paste your text containing HTML entities into the Input field</li>
+                <li>The cleaned text appears automatically in the Output field</li>
+                <li>Use "Copy" to copy the clean result to your clipboard</li>
+            </ol>
+        </section>
+
+        <section class="tool-area">
+            <div class="pg-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div>
+                    <label for="input-data" class="input-label">INPUT (with entities)</label>
+                    <textarea id="input-data" rows="15" class="pg-input" style="resize: vertical; font-family: var(--font-mono);" placeholder='[
+  {&quot;name&quot;: &quot;John&quot;, &quot;age&quot;: 30}
+]'></textarea>
+                    <div class="control-right" style="margin-top: 0.5rem;">
+                        <button id="clear-btn" class="btn btn-secondary">Clear</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="output-data" class="input-label">OUTPUT (clean text)</label>
+                    <textarea id="output-data" rows="15" class="pg-input" readonly style="resize: vertical; font-family: var(--font-mono); background-color: var(--bg-output);"></textarea>
+                    <div class="control-right" style="margin-top: 0.5rem;">
+                        <button id="copy-btn" class="btn btn-secondary">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/html-decoder.js"></script>
+</body>
+</html>
