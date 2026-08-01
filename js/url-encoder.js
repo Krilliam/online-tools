@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
     // HTML ENTITIES DECODER
+    // Converte &quot; &amp; &lt; &gt; ecc. nei caratteri corretti
     // ==========================================
     function decodeHtmlEntities(text) {
         const textarea = document.createElement('textarea');
@@ -53,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             throw new Error("Invalid JSON format. Please check your input. Make sure to remove any HTML entities like &quot; or &amp;");
         }
 
+        // Se è un singolo oggetto, avvolgilo in un array
         if (!Array.isArray(data)) {
             if (typeof data === 'object' && data !== null) {
                 data = [data];
@@ -63,8 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (data.length === 0) return '';
 
+        // Raccoglie tutte le chiavi uniche da tutti gli oggetti (gestisce strutture non uniformi)
         const allKeys = [...new Set(data.flatMap(Object.keys))];
 
+        // Funzione per escapare le virgolette in CSV
         const escapeCsv = (val) => {
             if (val === null || val === undefined) return '""';
             const str = String(val).replace(/"/g, '""');
@@ -88,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             throw new Error("CSV input is empty.");
         }
 
+        // Parser CSV robusto che gestisce virgolette e delimiter all'interno dei campi
         function parseLine(line) {
             const result = [];
             let current = '';
@@ -100,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (char === '"') {
                     if (inQuotes && nextChar === '"') {
                         current += '"';
-                        i++;
+                        i++; // Salta la virgoletta successiva
                     } else {
                         inQuotes = !inQuotes;
                     }
@@ -125,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers = parseLine(lines[0]);
             dataStartIndex = 1;
         } else {
+            // Genera header generici basati sul numero di colonne della prima riga
             const firstRow = parseLine(lines[0]);
             headers = firstRow.map((_, index) => `col${index + 1}`);
             dataStartIndex = 0;
@@ -132,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const jsonData = [];
         for (let i = dataStartIndex; i < lines.length; i++) {
-            if (!lines[i].trim()) continue;
+            if (!lines[i].trim()) continue; // Salta righe vuote
             
             const values = parseLine(lines[i]);
             const obj = {};
@@ -140,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers.forEach((header, index) => {
                 let val = values[index] !== undefined ? values[index] : '';
                 
+                // Prova a convertire in numero o booleano se sembra tale
                 if (val === 'true') val = true;
                 else if (val === 'false') val = false;
                 else if (val !== '' && !isNaN(val) && val.trim() !== '') {
@@ -245,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
     });
 
+    // Shortcut: Ctrl+Enter per convertire
     inputData.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === 'Enter') {
             convert();
