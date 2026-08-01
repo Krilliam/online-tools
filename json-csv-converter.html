@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON ↔ CSV Converter - Online Tools</title>
+    <meta name="description" content="Convert JSON to CSV and CSV to JSON instantly. Handles nested data, quotes, and custom delimiters. Free, client-side.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>JSON ↔ CSV Converter</h1>
+            <p>Convert data between JSON and CSV formats instantly with robust parsing.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Paste your JSON array or CSV data into the Input field</li>
+                <li>Select the conversion direction and delimiter (if converting to CSV)</li>
+                <li>Click "Convert" (or it updates automatically)</li>
+                <li>Use "Copy" to copy the result or "Download" to save as a file</li>
+            </ol>
+        </section>
+
+        <section class="tool-area">
+            <!-- Controls -->
+            <div class="pg-grid" style="margin-bottom: 1.5rem;">
+                <div class="pg-field">
+                    <label class="input-label">CONVERSION DIRECTION</label>
+                    <select id="conversion-mode" class="pg-input">
+                        <option value="json-to-csv">JSON to CSV</option>
+                        <option value="csv-to-json">CSV to JSON</option>
+                    </select>
+                </div>
+                <div class="pg-field">
+                    <label class="input-label">CSV DELIMITER</label>
+                    <select id="csv-delimiter" class="pg-input">
+                        <option value=",">Comma (,)</option>
+                        <option value=";">Semicolon (;)</option>
+                        <option value="	">Tab (\t)</option>
+                        <option value="|">Pipe (|)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Input / Output Grid -->
+            <div class="pg-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div>
+                    <label for="input-data" class="input-label">INPUT</label>
+                    <textarea id="input-data" rows="15" class="pg-input" style="resize: vertical; font-family: var(--font-mono);" placeholder='[
+  {"name": "John", "age": 30, "city": "New York"},
+  {"name": "Jane", "age": 25, "city": "London"}
+]'></textarea>
+                    <div class="control-right" style="margin-top: 0.5rem;">
+                        <button id="clear-btn" class="btn btn-secondary">Clear</button>
+                        <button id="convert-btn" class="btn btn-primary">Convert</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="output-data" class="input-label">OUTPUT</label>
+                    <textarea id="output-data" rows="15" class="pg-input" readonly style="resize: vertical; font-family: var(--font-mono); background-color: var(--bg-output);"></textarea>
+                    <div class="control-right" style="margin-top: 0.5rem;">
+                        <button id="copy-btn" class="btn btn-secondary">Copy</button>
+                        <button id="download-btn" class="btn btn-secondary">Download</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error-message" style="display: none; margin-top: 1rem; padding: 1rem; background-color: #fee2e2; color: #b91c1c; border-radius: 6px; border: 1px solid #fecaca;"></div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/json-csv-converter.js"></script>
+</body>
+</html>
