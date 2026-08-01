@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const outputData = document.getElementById('output-data');
     const modeSelect = document.getElementById('conversion-mode');
     const delimiterSelect = document.getElementById('csv-delimiter');
+    const hasHeaderCheckbox = document.getElementById('csv-has-header');
+    const csvOptionsField = document.getElementById('csv-options-field');
     const convertBtn = document.getElementById('convert-btn');
     const clearBtn = document.getElementById('clear-btn');
     const copyBtn = document.getElementById('copy-btn');
@@ -19,6 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMsg.style.display = 'none';
     }
 
+    // Mostra/nascondi opzioni CSV in base alla modalità
+    function updateUI() {
+        if (modeSelect.value === 'csv-to-json') {
+            csvOptionsField.style.display = '';
+        } else {
+            csvOptionsField.style.display = 'none';
+        }
+    }
+
     // ==========================================
     // JSON TO CSV LOGIC
     // ==========================================
@@ -30,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
             throw new Error("Invalid JSON format. Please check your input.");
         }
 
-        // Se è un singolo oggetto, avvolgilo in un array
         if (!Array.isArray(data)) {
             if (typeof data === 'object' && data !== null) {
                 data = [data];
@@ -41,10 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (data.length === 0) return '';
 
-        // Raccoglie tutte le chiavi uniche da tutti gli oggetti (gestisce strutture non uniformi)
         const allKeys = [...new Set(data.flatMap(Object.keys))];
 
-        // Funzione per escapare le virgolette in CSV
         const escapeCsv = (val) => {
             if (val === null || val === undefined) return '""';
             const str = String(val).replace(/"/g, '""');
@@ -57,16 +65,17 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         return [header, ...rows].join('\n');
-        }
+    }
 
     // ==========================================
     // CSV TO JSON LOGIC (Robust Parser)
     // ==========================================
-    function csvToJson(csvString, delimiter) {
+    function csvToJson(csvString, delimiter, hasHeader) {
         const lines = csvString.trim().split(/\r?\n/);
-        if (lines.length < 2) throw new Error("CSV must have at least a header row and one data row.");
+        if (lines.length === 0 || (lines.length === 1 && !lines[0].trim())) {
+            throw new Error("CSV input is empty.");
+        }
 
-        // Parser CSV robusto che gestisce virgolette e delimiter all'interno dei campi
         function parseLine(line) {
             const result = [];
             let current = '';
@@ -79,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (char === '"') {
                     if (inQuotes && nextChar === '"') {
                         current += '"';
-                        i++; // Salta la virgoletta successiva
+                        i++;
                     } else {
                         inQuotes = !inQuotes;
                     }
@@ -94,11 +103,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return result;
         }
 
-        const headers = parseLine(lines[0]);
-        const jsonData = [];
+        let headers = [];
+        let dataStartIndex = 0;
 
-        for (let i = 1; i < lines.length; i++) {
-            if (!lines[i].trim()) continue; // Salta righe vuote
+        if (hasHeader) {
+            if (lines.length < 2) {
+                throw new Error("CSV must have at least a header row and one data row when 'First row contains headers' is checked.");
+            }
+            headers = parseLine(lines[0]);
+            dataStartIndex = 1;
+        } else {
+            // Genera header generici basati sul numero di colonne della prima riga
+            const firstRow = parseLine(lines[0]);
+            headers = firstRow.map((_, index) => `col${index + 1}`);
+            dataStartIndex = 0;
+        }
+
+        const jsonData = [];
+        for (let i = dataStartIndex; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
             
             const values = parseLine(lines[i]);
             const obj = {};
@@ -106,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
             headers.forEach((header, index) => {
                 let val = values[index] !== undefined ? values[index] : '';
                 
-                // Prova a convertire in numero o booleano se sembra tale
                 if (val === 'true') val = true;
                 else if (val === 'false') val = false;
                 else if (val !== '' && !isNaN(val) && val.trim() !== '') {
@@ -134,12 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const mode = modeSelect.value;
         const delimiter = delimiterSelect.value;
+        const hasHeader = hasHeaderCheckbox.checked;
 
         try {
             if (mode === 'json-to-csv') {
                 outputData.value = jsonToCsv(input, delimiter);
             } else {
-                outputData.value = csvToJson(input, delimiter);
+                outputData.value = csvToJson(input, delimiter, hasHeader);
             }
         } catch (error) {
             showError(error.message);
@@ -151,8 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     convertBtn.addEventListener('click', convert);
     
-    // Converti anche al cambio di modalità o delimiter se c'è già input
     modeSelect.addEventListener('change', () => {
+        updateUI();
         inputData.value = '';
         outputData.value = '';
         hideError();
@@ -160,6 +183,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     delimiterSelect.addEventListener('change', () => {
         if (inputData.value.trim()) convert();
+    });
+
+    hasHeaderCheckbox.addEventListener('change', () => {
+        if (inputData.value.trim() && modeSelect.value === 'csv-to-json') {
+            convert();
+        }
     });
 
     clearBtn.addEventListener('click', () => {
@@ -205,10 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
     });
 
-    // Shortcut: Ctrl+Enter per convertire
     inputData.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === 'Enter') {
             convert();
         }
     });
+
+    // Initial setup
+    updateUI();
 });
