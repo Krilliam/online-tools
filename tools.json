@@ -53,6 +53,15 @@
       "category": "devops",
       "tags": ["cron", "systemd", "linux", "timer", "cronjob", "devops"],
       "status": "live"
+    },
+    {
+      "id": "json-csv-converter",
+      "name": "JSON ↔ CSV Converter",
+      "description": "Convert JSON arrays to CSV and vice versa. Handles quotes, custom delimiters, and auto-detects structure.",
+      "url": "json-csv-converter.html",
+      "category": "devops",
+      "tags": ["json", "csv", "converter", "data", "parser", "devops"],
+      "status": "live"
     }
   ]
 }
