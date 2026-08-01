@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("URL Encoder script loaded");
+
     const inputData = document.getElementById('input-data');
     const outputData = document.getElementById('output-data');
     const operationMode = document.getElementById('operation-mode');
@@ -10,11 +12,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadBtn = document.getElementById('download-btn');
     const errorMsg = document.getElementById('error-message');
 
-    // Verifica che tutti gli elementi esistano
-    if (!inputData || !outputData || !operationMode || !encodingMode || 
-        !lineByLine || !clearBtn || !swapBtn || !copyBtn || !downloadBtn || !errorMsg) {
-        console.error('One or more required elements are missing from the HTML');
-        return;
+    // Controllo di sicurezza: se manca qualcosa, avvisa nella console
+    const elements = { inputData, outputData, operationMode, encodingMode, lineByLine, clearBtn, swapBtn, copyBtn, downloadBtn, errorMsg };
+    let missingElements = [];
+    
+    for (const [name, el] of Object.entries(elements)) {
+        if (!el) {
+            missingElements.push(name);
+            console.error(`CRITICAL: Element with id '${name}' is missing from the HTML!`);
+        }
+    }
+
+    if (missingElements.length > 0) {
+        console.error(`Aborting script execution. Missing: ${missingElements.join(', ')}. HARD REFRESH (Ctrl+F5) required!`);
+        return; // Ferma l'esecuzione per evitare l'errore "Cannot read properties of null"
     }
 
     function showError(msg) {
@@ -35,16 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function encodeFullUrl(text) {
-        // Preserva :/?#[]@!$&'()*+,;=
-        // Codifica tutto il resto
-        return text.replace(/[^A-Za-z0-9\-_.~:/?#\[\]@!$&'()*+,;=]/g, (char) => {
-            const encoded = encodeURIComponent(char);
-            return encoded;
-        });
+        return text.replace(/[^A-Za-z0-9\-_.~:/?#\[\]@!$&'()*+,;=]/g, (char) => encodeURIComponent(char));
     }
 
     function encodeFormUrlEncoded(text) {
-        // encodeURIComponent + sostituisci %20 con +
         return encodeURIComponent(text).replace(/%20/g, '+');
     }
 
@@ -56,12 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function decodeFullUrl(text) {
-        // decodeURIComponent gestisce già tutto correttamente
         return decodeURIComponent(text);
     }
 
     function decodeFormUrlEncoded(text) {
-        // Sostituisci + con %20 prima di decodificare
         return decodeURIComponent(text.replace(/\+/g, '%20'));
     }
 
@@ -85,43 +88,31 @@ document.addEventListener('DOMContentLoaded', () => {
             let result;
 
             if (batch) {
-                // Processa riga per riga
                 const lines = input.split(/\r?\n/);
                 const processedLines = lines.map(line => {
-                    if (!line.trim()) return line; // Mantieni righe vuote
-                    
+                    if (!line.trim()) return line;
                     if (operation === 'encode') {
-                        switch (mode) {
-                            case 'component': return encodeComponent(line);
-                            case 'full': return encodeFullUrl(line);
-                            case 'form': return encodeFormUrlEncoded(line);
-                        }
+                        if (mode === 'component') return encodeComponent(line);
+                        if (mode === 'full') return encodeFullUrl(line);
+                        if (mode === 'form') return encodeFormUrlEncoded(line);
                     } else {
-                        switch (mode) {
-                            case 'component': return decodeComponent(line);
-                            case 'full': return decodeFullUrl(line);
-                            case 'form': return decodeFormUrlEncoded(line);
-                        }
+                        if (mode === 'component') return decodeComponent(line);
+                        if (mode === 'full') return decodeFullUrl(line);
+                        if (mode === 'form') return decodeFormUrlEncoded(line);
                     }
                 });
                 result = processedLines.join('\n');
             } else {
-                // Processa tutto il testo
                 if (operation === 'encode') {
-                    switch (mode) {
-                        case 'component': result = encodeComponent(input); break;
-                        case 'full': result = encodeFullUrl(input); break;
-                        case 'form': result = encodeFormUrlEncoded(input); break;
-                    }
+                    if (mode === 'component') result = encodeComponent(input);
+                    else if (mode === 'full') result = encodeFullUrl(input);
+                    else if (mode === 'form') result = encodeFormUrlEncoded(input);
                 } else {
-                    switch (mode) {
-                        case 'component': result = decodeComponent(input); break;
-                        case 'full': result = decodeFullUrl(input); break;
-                        case 'form': result = decodeFormUrlEncoded(input); break;
-                    }
+                    if (mode === 'component') result = decodeComponent(input);
+                    else if (mode === 'full') result = decodeFullUrl(input);
+                    else if (mode === 'form') result = decodeFormUrlEncoded(input);
                 }
             }
-
             outputData.value = result;
         } catch (error) {
             if (error.message.includes('URI malformed')) {
@@ -135,8 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // EVENT LISTENERS
     // ==========================================
-    
-    // Processa automaticamente al cambio di qualsiasi opzione o input
     [inputData, operationMode, encodingMode, lineByLine].forEach(el => {
         el.addEventListener('input', process);
         el.addEventListener('change', process);
@@ -153,8 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const temp = inputData.value;
         inputData.value = outputData.value;
         outputData.value = temp;
-        
-        // Inverti anche l'operazione
         operationMode.value = operationMode.value === 'encode' ? 'decode' : 'encode';
         process();
     });
@@ -179,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
     downloadBtn.addEventListener('click', () => {
         const text = outputData.value;
         if (!text) return;
-        
         const blob = new Blob([text], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
