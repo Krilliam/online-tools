@@ -252,7 +252,7 @@
                 </div>
             </div>
 
-            <!-- Restore File (solo per pg_restore) -->
+            <!-- Restore File (only for pg_restore) -->
             <div class="pg-section" id="restore-file-section" style="display: none;">
                 <label class="input-label">RESTORE FILE</label>
                 <div class="pg-field">
@@ -263,6 +263,9 @@
                     <input type="text" id="val-restore-file" class="pg-input" placeholder="/home/user/backup.dump" disabled>
                 </div>
             </div>
+
+            <!-- Validation Messages -->
+            <div id="validation-messages" style="margin-bottom: 1rem;"></div>
 
             <!-- Generated Command -->
             <div class="pg-section">
