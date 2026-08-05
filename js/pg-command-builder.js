@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Sanitizes input by trimming whitespace and removing leading dashes
-    // This prevents users from accidentally typing the flag itself (e.g., typing "-h" in the host field)
     function sanitizeValue(value) {
         if (!value) return '';
         return value.trim().replace(/^-+/, '');
@@ -103,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return { errors, warnings };
         }
 
-        // 1. Check for unbalanced double quotes (ignoring escaped quotes \")
+        // 1. Check for unbalanced quotes
         let inDoubleQuote = false;
         let inSingleQuote = false;
         for (let i = 0; i < cmd.length; i++) {
@@ -125,21 +124,51 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Check for flags that require a value but appear to be missing one
         const flagsNeedingValue = ['-h', '-p', '-U', '-d', '-H', '-f', '-j', '-Z', '-n', '-N', '-t', '-T'];
         flagsNeedingValue.forEach(flag => {
-            // Regex looks for the flag followed by a space and then another flag or end of string
             const regex = new RegExp(`${flag}\\s+(-[a-zA-Z]|--\\w+|$)`);
             if (regex.test(cmd)) {
                 errors.push(`The flag ${flag} appears to be missing its required value.`);
             }
         });
 
-        // 3. Check for dangerous shell metacharacters that are not quoted
-        if (/[;|&<>$`]/.test(cmd)) {
-            warnings.push("The command contains shell metacharacters (;, |, &, <, >, $, `). Ensure they are properly quoted, as they may alter command execution or cause errors.");
+        // 3. Check for dangerous shell metacharacters (including glob patterns ? and *)
+        // These can cause unexpected file expansion or command injection
+        if (/[;|&<>$`?*]/.test(cmd)) {
+            warnings.push("The command contains shell metacharacters (;, |, &, <, >, $, `, ?, *). Ensure they are properly quoted, as they may alter command execution or cause errors.");
         }
 
-        // 4. Check for multiple consecutive spaces (often indicates a missing value)
+        // 4. Check for multiple consecutive spaces
         if (/  +/.test(cmd)) {
             warnings.push("Multiple consecutive spaces detected. This might indicate a missing value for a flag.");
+        }
+
+        // 5. Validate numeric fields (port, jobs, compression)
+        const portMatch = cmd.match(/-p\s+(\S+)/);
+        if (portMatch) {
+            const portValue = portMatch[1].replace(/"/g, '');
+            if (!/^\d+$/.test(portValue)) {
+                errors.push(`Invalid port number "${portValue}". Port must be a numeric value.`);
+            }
+        }
+
+        const jobsMatch = cmd.match(/-j\s+(\S+)/);
+        if (jobsMatch) {
+            const jobsValue = jobsMatch[1].replace(/"/g, '');
+            if (!/^\d+$/.test(jobsValue)) {
+                errors.push(`Invalid jobs number "${jobsValue}". Jobs must be a numeric value.`);
+            }
+        }
+
+        const compressMatch = cmd.match(/-Z\s+(\S+)/);
+        if (compressMatch) {
+            const compressValue = compressMatch[1].replace(/"/g, '');
+            if (!/^\d+$/.test(compressValue)) {
+                errors.push(`Invalid compression level "${compressValue}". Compression must be a numeric value (0-9).`);
+            } else {
+                const level = parseInt(compressValue, 10);
+                if (level < 0 || level > 9) {
+                    errors.push(`Compression level ${level} is out of range. Must be between 0 and 9.`);
+                }
+            }
         }
 
         return { errors, warnings };
