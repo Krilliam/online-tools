@@ -3,8 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const versionSelect = document.getElementById('pg-version');
     const outputEl = document.getElementById('pg-output').querySelector('code');
     const copyBtn = document.getElementById('copy-cmd-btn');
+    const validationContainer = document.getElementById('validation-messages');
 
-    // Opzioni specifiche per pg_dump vs pg_restore
+    // Options specific to pg_dump vs pg_restore
     const dumpOnlyOptions = ['opt-format', 'opt-file', 'opt-compress', 'opt-schema-only', 'opt-data-only', 'opt-inserts'];
     const restoreOnlyOptions = ['opt-clean', 'opt-create'];
 
@@ -14,6 +15,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getVersion() {
         return parseInt(versionSelect.value, 10);
+    }
+
+    // Sanitizes input by trimming whitespace and removing leading dashes
+    // This prevents users from accidentally typing the flag itself (e.g., typing "-h" in the host field)
+    function sanitizeValue(value) {
+        if (!value) return '';
+        return value.trim().replace(/^-+/, '');
     }
 
     function updateVersionSpecificOptions() {
@@ -74,15 +82,90 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (checkbox) {
                     checkbox.checked = false;
                     const input = document.getElementById('val-restore-file');
-                    if (input) {
-                        input.disabled = true;
-                        input.value = '';
+                    if (input) { 
+                        input.disabled = true; 
+                        input.value = ''; 
                     }
                 }
             }
         }
     }
 
+    // ==========================================
+    // SYNTAX CONTROLLER / VALIDATOR
+    // ==========================================
+    function validateCommand(cmd) {
+        const errors = [];
+        const warnings = [];
+
+        // Skip validation if the command is just the base executable name
+        if (!cmd || cmd === 'pg_dump' || cmd === 'pg_restore') {
+            return { errors, warnings };
+        }
+
+        // 1. Check for unbalanced double quotes (ignoring escaped quotes \")
+        let inDoubleQuote = false;
+        let inSingleQuote = false;
+        for (let i = 0; i < cmd.length; i++) {
+            if (cmd[i] === '"' && (i === 0 || cmd[i-1] !== '\\')) {
+                inDoubleQuote = !inDoubleQuote;
+            }
+            if (cmd[i] === "'" && (i === 0 || cmd[i-1] !== '\\')) {
+                inSingleQuote = !inSingleQuote;
+            }
+        }
+        
+        if (inDoubleQuote) {
+            errors.push("Unbalanced double quotes. Ensure every opening quote has a closing quote.");
+        }
+        if (inSingleQuote) {
+            errors.push("Unbalanced single quotes. Ensure every opening quote has a closing quote.");
+        }
+
+        // 2. Check for flags that require a value but appear to be missing one
+        const flagsNeedingValue = ['-h', '-p', '-U', '-d', '-H', '-f', '-j', '-Z', '-n', '-N', '-t', '-T'];
+        flagsNeedingValue.forEach(flag => {
+            // Regex looks for the flag followed by a space and then another flag or end of string
+            const regex = new RegExp(`${flag}\\s+(-[a-zA-Z]|--\\w+|$)`);
+            if (regex.test(cmd)) {
+                errors.push(`The flag ${flag} appears to be missing its required value.`);
+            }
+        });
+
+        // 3. Check for dangerous shell metacharacters that are not quoted
+        if (/[;|&<>$`]/.test(cmd)) {
+            warnings.push("The command contains shell metacharacters (;, |, &, <, >, $, `). Ensure they are properly quoted, as they may alter command execution or cause errors.");
+        }
+
+        // 4. Check for multiple consecutive spaces (often indicates a missing value)
+        if (/  +/.test(cmd)) {
+            warnings.push("Multiple consecutive spaces detected. This might indicate a missing value for a flag.");
+        }
+
+        return { errors, warnings };
+    }
+
+    function renderValidationMessages(errors, warnings) {
+        validationContainer.innerHTML = '';
+        
+        errors.forEach(err => {
+            const div = document.createElement('div');
+            div.className = 'validation-message validation-error';
+            div.textContent = `ERROR: ${err}`;
+            validationContainer.appendChild(div);
+        });
+
+        warnings.forEach(warn => {
+            const div = document.createElement('div');
+            div.className = 'validation-message validation-warning';
+            div.textContent = `WARNING: ${warn}`;
+            validationContainer.appendChild(div);
+        });
+    }
+
+    // ==========================================
+    // COMMAND GENERATION
+    // ==========================================
     function generateCommand() {
         const cmdType = getCommandType();
         const parts = [cmdType];
@@ -100,9 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = document.getElementById(opt.id);
             if (checkbox && checkbox.checked) {
                 const valEl = document.getElementById(opt.valId);
-                const value = valEl.value.trim();
+                const value = sanitizeValue(valEl.value);
                 if (value) {
-                    // Aggiungi quotes se il valore contiene spazi
                     const needsQuotes = value.includes(' ');
                     parts.push(`${checkbox.dataset.flag} ${needsQuotes ? '"' + value + '"' : value}`);
                 }
@@ -114,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             parts.push('-w');
         }
 
-        // Format & Output (incluso -j per entrambi i comandi)
+        // Format & Output
         const formatOpts = [
             { id: 'opt-format', valId: 'val-format' },
             { id: 'opt-file', valId: 'val-file' },
@@ -126,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = document.getElementById(opt.id);
             if (checkbox && checkbox.checked) {
                 const valEl = document.getElementById(opt.valId);
-                const value = valEl.value.trim();
+                const value = sanitizeValue(valEl.value);
                 if (value) {
                     parts.push(`${checkbox.dataset.flag} ${value}`);
                 }
@@ -146,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = document.getElementById(opt.id);
             if (checkbox && checkbox.checked) {
                 const valEl = document.getElementById(opt.valId);
-                const value = valEl.value.trim();
+                const value = sanitizeValue(valEl.value);
                 if (value) {
                     if (opt.id === 'opt-filter') {
                         parts.push(`--filter=${value}`);
@@ -182,25 +264,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Restore file path (solo per pg_restore, ultimo argomento)
+        // Restore file path (only for pg_restore, last argument)
         if (cmdType === 'pg_restore') {
             const restoreFileCheckbox = document.getElementById('opt-restore-file');
             if (restoreFileCheckbox && restoreFileCheckbox.checked) {
                 const restoreFileInput = document.getElementById('val-restore-file');
-                const filePath = restoreFileInput.value.trim();
+                const filePath = sanitizeValue(restoreFileInput.value);
                 if (filePath) {
-                    // Aggiungi quotes se il path contiene spazi
                     const needsQuotes = filePath.includes(' ');
                     parts.push(needsQuotes ? `"${filePath}"` : filePath);
                 }
             }
         }
 
-        // Output su SINGOLA RIGA
-        outputEl.textContent = parts.join(' ');
+        // Generate single-line output
+        const finalCommand = parts.join(' ');
+        outputEl.textContent = finalCommand;
+
+        // Execute validator and render results
+        const { errors, warnings } = validateCommand(finalCommand);
+        renderValidationMessages(errors, warnings);
     }
 
-    // Event listeners per tipo comando
+    // ==========================================
+    // EVENT LISTENERS
+    // ==========================================
     cmdTypeRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             updateCommandTypeSpecificOptions();
@@ -210,13 +298,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Event listener per versione
     versionSelect.addEventListener('change', () => {
         updateVersionSpecificOptions();
         generateCommand();
     });
 
-    // Checkbox listeners per abilitare/disabilitare input
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', () => {
             const parent = checkbox.closest('.pg-field');
@@ -233,13 +319,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Input listeners
     document.querySelectorAll('input[type="text"], input[type="number"], select').forEach(input => {
         input.addEventListener('input', generateCommand);
         input.addEventListener('change', generateCommand);
     });
 
-    // Copy button
     copyBtn.addEventListener('click', async () => {
         const text = outputEl.textContent;
         if (!text) return;
