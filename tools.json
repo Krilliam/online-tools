@@ -89,6 +89,15 @@
       "category": "devops",
       "tags": ["timestamp", "unix", "epoch", "date", "time", "converter", "iso8601", "devops"],
       "status": "live"
+    },
+    {
+      "id": "port-reference",
+      "name": "TCP/UDP Port Reference",
+      "description": "Searchable database of TCP and UDP ports with service names, descriptions, and IANA status.",
+      "url": "port-reference.html",
+      "category": "network",
+      "tags": ["port", "tcp", "udp", "network", "reference", "iana", "service", "networking"],
+      "status": "live"
     }
   ]
 }
