@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const relativeTextEl = document.getElementById('ts-relative');
     const errorEl = document.getElementById('ts-error');
 
-    let currentDate = null; // Holds the parsed Date object
+    let currentDate = null;
 
     // ==========================================
     // CURRENT TIME DISPLAY
@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
     // INTELLIGENT PARSER
-    // Detects the input format and returns a Date object
     // ==========================================
     function parseTimestamp(input) {
         if (!input || !input.trim()) {
@@ -33,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Pure numeric: Unix timestamp
         if (/^-?\d+$/.test(trimmed)) {
             const num = parseInt(trimmed, 10);
-            // Heuristic: if the number is > 10^11, it's milliseconds
             if (Math.abs(num) > 1e11) {
                 const date = new Date(num);
                 if (!isNaN(date.getTime())) {
@@ -56,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 3. ISO 8601 format (2026-08-06T14:30:00Z or 2026-08-06T14:30:00.000Z)
+        // 3. ISO 8601 format
         if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(trimmed)) {
             const date = new Date(trimmed);
             if (!isNaN(date.getTime())) {
@@ -94,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 7. RFC 2822 format (e.g., "Thu, 06 Aug 2026 14:30:00 GMT")
+        // 7. RFC 2822 format
         if (/^[A-Za-z]{3},\s+\d{1,2}\s+[A-Za-z]{3}\s+\d{4}/.test(trimmed)) {
             const date = new Date(trimmed);
             if (!isNaN(date.getTime())) {
@@ -102,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 8. Natural language dates (e.g., "August 6, 2026", "6 Aug 2026", "2026-08-06 14:30:00")
+        // 8. Natural language dates
         const date = new Date(trimmed);
         if (!isNaN(date.getTime())) {
             return { date, format: 'Natural language date' };
@@ -114,30 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // FORMAT FUNCTIONS
     // ==========================================
-    function formatInTimezone(date, timezone) {
-        try {
-            return date.toLocaleString('en-US', {
-                timeZone: timezone,
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            });
-        } catch (e) {
-            return date.toString();
-        }
-    }
-
     function getConversions(date, timezone) {
         const unixSeconds = Math.floor(date.getTime() / 1000);
         const unixMillis = date.getTime();
 
         let tzDate;
         try {
-            // Create a date-like representation in the target timezone
             const tzString = date.toLocaleString('en-US', { timeZone: timezone });
             tzDate = new Date(tzString);
         } catch (e) {
@@ -190,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // RELATIVE TIME
+    // RELATIVE TIME (FIXED)
     // ==========================================
     function getRelativeTime(date) {
         const now = new Date();
@@ -203,17 +183,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const hours = Math.floor(minutes / 60);
         const days = Math.floor(hours / 24);
         const weeks = Math.floor(days / 7);
-        const months = Math.floor(days / 30);
-        const years = Math.floor(days / 365);
+        
+        // Use actual calendar months and years for better accuracy
+        const months = Math.floor(days / 30.44); // Average days per month
+        const years = Math.floor(days / 365.25); // Average days per year (accounting for leap years)
 
         let text;
-        if (seconds < 60) text = `${seconds} second${seconds !== 1 ? 's' : ''}`;
-        else if (minutes < 60) text = `${minutes} minute${minutes !== 1 ? 's' : ''}`;
-        else if (hours < 24) text = `${hours} hour${hours !== 1 ? 's' : ''}`;
-        else if (days < 7) text = `${days} day${days !== 1 ? 's' : ''}`;
-        else if (weeks < 5) text = `${weeks} week${weeks !== 1 ? 's' : ''}`;
-        else if (months < 12) text = `${months} month${months !== 1 ? 's' : ''}`;
-        else text = `${years} year${years !== 1 ? 's' : ''}`;
+        if (seconds < 60) {
+            text = `${seconds} second${seconds !== 1 ? 's' : ''}`;
+        } else if (minutes < 60) {
+            text = `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+        } else if (hours < 24) {
+            text = `${hours} hour${hours !== 1 ? 's' : ''}`;
+        } else if (days < 7) {
+            text = `${days} day${days !== 1 ? 's' : ''}`;
+        } else if (weeks < 4) {
+            text = `${weeks} week${weeks !== 1 ? 's' : ''}`;
+        } else if (months < 12) {
+            text = `${months} month${months !== 1 ? 's' : ''}`;
+        } else {
+            // Ensure we never show "0 years" - if we're here, it's at least 1 year
+            const finalYears = Math.max(1, years);
+            text = `${finalYears} year${finalYears !== 1 ? 's' : ''}`;
+        }
 
         return isFuture ? `in ${text}` : `${text} ago`;
     }
@@ -235,7 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsContainer.appendChild(row);
         });
 
-        // Attach copy listeners
         resultsContainer.querySelectorAll('.ts-copy-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const value = btn.dataset.value;
@@ -292,7 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const conversions = getConversions(date, timezone);
         renderResults(conversions);
 
-        // Relative time
         relativeTextEl.textContent = getRelativeTime(date);
         relativeSection.style.display = '';
     }
@@ -312,10 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
         process();
     });
 
-    // Update current time every second
     updateCurrentTime();
     setInterval(updateCurrentTime, 1000);
 
-    // Initial process
     process();
 });
