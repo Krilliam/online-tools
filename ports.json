@@ -51,3 +51,15 @@
     {"port": 5672, "protocol": "tcp", "service": "amqp", "description": "Advanced Message Queuing Protocol", "status": "official"},
     {"port": 5900, "protocol": "tcp", "service": "vnc", "description": "Virtual Network Computing", "status": "official"},
     {"port": 6379, "protocol": "tcp", "service": "redis", "description": "Redis Database", "status": "unofficial"},
+    {"port": 6443, "protocol": "tcp", "service": "k8s-api", "description": "Kubernetes API Server", "status": "unofficial"},
+    {"port": 8080, "protocol": "tcp", "service": "http-alt", "description": "HTTP Alternative / Web Servers", "status": "unofficial"},
+    {"port": 8443, "protocol": "tcp", "service": "https-alt", "description": "HTTPS Alternative", "status": "unofficial"},
+    {"port": 8888, "protocol": "tcp", "service": "jupyter", "description": "Jupyter Notebook / HTTP Alternative", "status": "unofficial"},
+    {"port": 9090, "protocol": "tcp", "service": "prometheus", "description": "Prometheus Web Interface", "status": "unofficial"},
+    {"port": 9200, "protocol": "tcp", "service": "elasticsearch", "description": "Elasticsearch HTTP", "status": "unofficial"},
+    {"port": 9300, "protocol": "tcp", "service": "elasticsearch", "description": "Elasticsearch Transport", "status": "unofficial"},
+    {"port": 11211, "protocol": "tcp", "service": "memcached", "description": "Memcached", "status": "unofficial"},
+    {"port": 11211, "protocol": "udp", "service": "memcached", "description": "Memcached", "status": "unofficial"},
+    {"port": 27017, "protocol": "tcp", "service": "mongodb", "description": "MongoDB Database", "status": "unofficial"}
+  ]
+}
