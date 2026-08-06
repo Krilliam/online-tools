@@ -1181,3 +1181,190 @@ pre code {
         max-width: 100%;
     }
 }
+/* =========================================
+   Port Reference Specifics
+   ========================================= */
+.port-controls {
+    margin-bottom: 2rem;
+}
+
+.port-search-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.port-search-input {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    border: 2px solid var(--border-card);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: var(--font-ui);
+    background-color: var(--bg-card);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.port-search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.port-filters {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.port-filter-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.port-radio-group {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.port-results-count {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.port-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+}
+
+.port-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--bg-card);
+}
+
+.port-table thead {
+    background-color: var(--bg-output);
+    border-bottom: 2px solid var(--border-card);
+}
+
+.port-table th {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+}
+
+.port-table td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid var(--border-card);
+    font-size: 0.9375rem;
+}
+
+.port-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.port-row {
+    transition: background-color 0.15s;
+}
+
+.port-row:hover {
+    background-color: var(--bg-output);
+}
+
+.port-number {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 1rem;
+}
+
+.port-protocol {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.port-protocol-tcp {
+    background-color: rgba(0, 102, 204, 0.1);
+    color: var(--accent);
+}
+
+.port-protocol-udp {
+    background-color: rgba(234, 88, 12, 0.1);
+    color: #ea580c;
+}
+
+.port-service {
+    font-family: var(--font-mono);
+    font-weight: 600;
+}
+
+.port-description {
+    color: var(--text-secondary);
+}
+
+.port-status {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.port-status-official {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+}
+
+.port-status-unofficial {
+    background-color: rgba(234, 179, 8, 0.1);
+    color: #ca8a04;
+}
+
+.port-table mark {
+    background-color: rgba(0, 102, 204, 0.15);
+    color: var(--accent);
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.port-loading,
+.port-empty,
+.port-error {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.port-error {
+    color: #b91c1c;
+}
+
+@media (max-width: 768px) {
+    .port-table {
+        font-size: 0.875rem;
+    }
+
+    .port-table th,
+    .port-table td {
+        padding: 0.625rem 0.75rem;
+    }
+
+    .port-filters {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
