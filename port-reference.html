@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP/UDP Port Reference - Online Tools</title>
+    <meta name="description" content="Searchable database of TCP and UDP ports with service names, descriptions, and IANA status. Free, client-side.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>TCP/UDP Port Reference</h1>
+            <p>Searchable database of common TCP and UDP ports with service names and descriptions.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Type a port number (e.g., "443"), service name (e.g., "http"), or keyword (e.g., "database")</li>
+                <li>Results update instantly as you type</li>
+                <li>Use filters to narrow by protocol (TCP/UDP) or IANA status</li>
+                <li>Click any row to see full details</li>
+            </ol>
+        </section>
+
+        <section class="tool-area">
+            <!-- Search and Filters -->
+            <div class="port-controls">
+                <div class="port-search-wrapper">
+                    <input type="text" id="port-search" class="port-search-input" placeholder="Search by port number, service name, or description..." autocomplete="off">
+                </div>
+                
+                <div class="port-filters">
+                    <div class="port-filter-group">
+                        <label class="input-label">PROTOCOL</label>
+                        <div class="port-radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="protocol-filter" value="all" checked>
+                                <span>All</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="protocol-filter" value="tcp">
+                                <span>TCP</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="protocol-filter" value="udp">
+                                <span>UDP</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="port-filter-group">
+                        <label class="input-label">STATUS</label>
+                        <div class="port-radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="status-filter" value="all" checked>
+                                <span>All</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="status-filter" value="official">
+                                <span>Official</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="status-filter" value="unofficial">
+                                <span>Unofficial</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Count -->
+            <div id="port-results-count" class="port-results-count"></div>
+
+            <!-- Results Table -->
+            <div class="port-table-wrapper">
+                <table class="port-table">
+                    <thead>
+                        <tr>
+                            <th>Port</th>
+                            <th>Protocol</th>
+                            <th>Service</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="port-table-body">
+                        <tr>
+                            <td colspan="5" class="port-loading">Loading port database...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/port-reference.js"></script>
+</body>
+</html>
