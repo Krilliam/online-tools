@@ -16,11 +16,21 @@
             <p>Free tools for developers. No login, no tracking, all calculations happen in your browser.</p>
         </section>
 
+        <!-- Search Bar -->
+        <section class="search-section">
+            <div class="search-wrapper">
+                <input type="text" id="search-input" class="search-input" placeholder="Search tools... (e.g., sql, cron, subnet)" autocomplete="off">
+                <div id="search-dropdown" class="search-dropdown" style="display: none;"></div>
+            </div>
+        </section>
+
+        <!-- Category Filters -->
         <section class="filters">
             <button class="filter-btn active" data-category="all">All</button>
             <div id="category-filters"></div>
         </section>
 
+        <!-- Tools Grid -->
         <section id="tools-grid" class="tools-grid">
             <noscript>
                 <div class="tool-card">
