@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timestamp Converter - Online Tools</title>
+    <meta name="description" content="Convert Unix timestamps to human-readable dates and vice versa. Supports ISO 8601, RFC 2822, multiple formats, and timezones. Free, client-side.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>Timestamp Converter</h1>
+            <p>Convert Unix timestamps to human-readable dates and vice versa in multiple formats.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Type or paste a timestamp (Unix seconds, Unix milliseconds, or any date string)</li>
+                <li>The tool automatically detects the format and shows all conversions</li>
+                <li>Use "Set to Now" to work with the current time</li>
+                <li>Click "Copy" on any row to copy that specific format</li>
+            </ol>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                <strong>Tip:</strong> The tool accepts Unix timestamps (seconds or milliseconds), ISO 8601 strings, natural language dates, and more.
+            </p>
+        </section>
+
+        <section class="tool-area">
+            <!-- Current Time Display -->
+            <div class="ts-current-time">
+                <label class="input-label">CURRENT TIME</label>
+                <div class="ts-now-display">
+                    <span id="current-time-utc"></span>
+                    <button id="set-now-btn" class="btn btn-secondary">Set to Now</button>
+                </div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="ts-section">
+                <label for="ts-input" class="input-label">INPUT</label>
+                <div class="ts-input-row">
+                    <input type="text" id="ts-input" class="ts-input" placeholder="e.g., 1722956400, 1722956400000, 2026-08-06T14:30:00Z, August 6, 2026">
+                </div>
+                <div class="ts-detected-info">
+                    <span id="detected-format">Detected format: none</span>
+                </div>
+            </div>
+
+            <!-- Timezone Selector -->
+            <div class="ts-section">
+                <label for="ts-timezone" class="input-label">DISPLAY TIMEZONE</label>
+                <select id="ts-timezone" class="ts-select">
+                    <option value="UTC">UTC</option>
+                    <option value="local">Local (browser timezone)</option>
+                    <option value="America/New_York">America/New_York (EST/EDT)</option>
+                    <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                    <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+                    <option value="Europe/London">Europe/London (GMT/BST)</option>
+                    <option value="Europe/Rome">Europe/Rome (CET/CEST)</option>
+                    <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+                    <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+                    <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                    <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+                    <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                    <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+                    <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                    <option value="Pacific/Auckland">Pacific/Auckland (NZST/NZDT)</option>
+                </select>
+            </div>
+
+            <!-- Results Table -->
+            <div class="ts-section">
+                <label class="input-label">CONVERSIONS</label>
+                <div id="ts-results" class="ts-results">
+                    <p class="ts-empty">Enter a timestamp above to see all conversions.</p>
+                </div>
+            </div>
+
+            <!-- Relative Time -->
+            <div class="ts-section" id="ts-relative-section" style="display: none;">
+                <label class="input-label">RELATIVE TIME</label>
+                <p id="ts-relative" class="ts-relative-text"></p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="ts-error" class="error-message" style="display: none;"></div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/timestamp-converter.js"></script>
+</body>
+</html>
