@@ -80,6 +80,15 @@
       "category": "devops",
       "tags": ["html", "decoder", "entities", "quot", "amp", "clean", "devops"],
       "status": "live"
+    },
+    {
+      "id": "timestamp-converter",
+      "name": "Timestamp Converter",
+      "description": "Convert Unix timestamps to human-readable dates and vice versa. Supports multiple formats and timezones.",
+      "url": "timestamp-converter.html",
+      "category": "devops",
+      "tags": ["timestamp", "unix", "epoch", "date", "time", "converter", "iso8601", "devops"],
+      "status": "live"
     }
   ]
 }
