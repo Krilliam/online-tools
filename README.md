@@ -17,7 +17,7 @@ Collection of free online tools for developers. No login, no tracking, all calcu
 - **Versioning**: GitHub
 - **Build**: none (static files served directly)
 
-## Project Structure
+## Project Structure example
 
     online-tools/
     ├── index.html              # Homepage (dynamically generated from tools.json)
@@ -50,7 +50,7 @@ Visual interface to build cron expressions with a preview of the next 5 executio
 ### Subnet Calculator
 Calculate IPv4 subnets: network address, broadcast, usable hosts, subnet mask, and binary representation.
 
-## How to Add a New Tool
+## Example of how to Add a New Tool
 
 1. **Create the HTML page** for the tool (e.g., `json-validator.html`):
    - Copy the structure from an existing tool
