@@ -36,20 +36,6 @@ Collection of free online tools for developers. No login, no tracking, all calcu
         ├── cron-generator.js   # Cron Generator logic
         └── subnet-calculator.js # Subnet Calculator logic
 
-## Available Tools
-
-### SQL Formatter
-Format complex SQL queries with JOINs and subqueries to make them readable. Supports MySQL, PostgreSQL, SQLite.
-
-### SQL to JXSQL Translator
-Convert PostgreSQL or MSSQL queries to JXSQL (Janox SQL) syntax. Automatically translates table and column references to `JXTAB()` and `JXCOL()`, and converts concatenations and substring functions to their JXSQL equivalents.
-
-### Cron Generator
-Visual interface to build cron expressions with a preview of the next 5 executions. Pure JavaScript implementation, no external dependencies.
-
-### Subnet Calculator
-Calculate IPv4 subnets: network address, broadcast, usable hosts, subnet mask, and binary representation.
-
 ## Example of how to Add a New Tool
 
 1. **Create the HTML page** for the tool (e.g., `json-validator.html`):
