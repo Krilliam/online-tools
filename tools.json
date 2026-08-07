@@ -98,6 +98,15 @@
       "category": "network",
       "tags": ["port", "tcp", "udp", "network", "reference", "iana", "service", "networking"],
       "status": "live"
+    },
+    {
+      "id": "http-status-codes",
+      "name": "HTTP Status Codes Reference",
+      "description": "Complete searchable reference of HTTP status codes (1xx, 2xx, 3xx, 4xx, 5xx) with descriptions and usage examples.",
+      "url": "http-status-codes.html",
+      "category": "network",
+      "tags": ["http", "status", "codes", "404", "500", "reference", "network", "web", "api"],
+      "status": "live"
     }
   ]
 }
