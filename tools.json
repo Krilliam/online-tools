@@ -107,6 +107,15 @@
       "category": "network",
       "tags": ["http", "status", "codes", "404", "500", "reference", "network", "web", "api"],
       "status": "live"
+    },
+    {
+      "id": "css-gradient-generator",
+      "name": "CSS Gradient Generator",
+      "description": "Generate CSS gradients (linear and radial) with live preview. Customize colors, angles, positions, and export ready-to-use CSS.",
+      "url": "css-gradient-generator.html",
+      "category": "frontend",
+      "tags": ["css", "gradient", "linear", "radial", "frontend", "design", "web"],
+      "status": "live"
     }
   ]
 }
