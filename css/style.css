@@ -1765,3 +1765,394 @@ pre code {
         height: 250px;
     }
 }
+
+/* =========================================
+   Unix Permission Calculator Specifics
+   ========================================= */
+.perm-section {
+    margin-bottom: 1.5rem;
+}
+
+.perm-mode-selector {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.perm-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.perm-grid-section,
+.perm-results-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Permissions Grid */
+.perm-grid {
+    display: grid;
+    grid-template-columns: 120px repeat(3, 1fr);
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.perm-grid-header {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.perm-grid-label {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+}
+
+.perm-grid-label.perm-user {
+    background-color: rgba(0, 102, 204, 0.08);
+    color: var(--accent);
+}
+
+.perm-grid-label.perm-group {
+    background-color: rgba(234, 88, 12, 0.08);
+    color: #ea580c;
+}
+
+.perm-grid-label.perm-other {
+    background-color: rgba(107, 114, 128, 0.08);
+    color: #4b5563;
+}
+
+.perm-grid-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: var(--bg-output);
+    border-radius: 4px;
+}
+
+.perm-grid-cell input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.perm-grid-cell input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Numeric Input */
+.perm-numeric-section {
+    margin-top: 0.5rem;
+}
+
+.perm-numeric-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.perm-numeric-input {
+    width: 120px;
+    padding: 0.625rem 1rem;
+    border: 2px solid var(--border-card);
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.25rem;
+    transition: border-color 0.2s;
+}
+
+.perm-numeric-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.perm-numeric-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--bg-output);
+}
+
+.perm-input-error {
+    border-color: #dc3545 !important;
+    background-color: #fee2e2 !important;
+}
+
+/* Special Bits */
+.perm-special-section {
+    margin-top: 0.5rem;
+}
+
+.perm-special-bits {
+    margin-top: 0.5rem;
+}
+
+.perm-special-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.perm-special-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: var(--bg-output);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.perm-special-item:hover {
+    background-color: var(--border-card);
+}
+
+.perm-special-item input[type="checkbox"] {
+    margin-top: 0.25rem;
+    cursor: pointer;
+}
+
+.perm-special-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.perm-special-info strong {
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+}
+
+.perm-special-info span {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+/* Results Section */
+.perm-result-block {
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-card);
+}
+
+.perm-result-block:last-child {
+    border-bottom: none;
+}
+
+.perm-symbolic-display {
+    font-family: var(--font-mono);
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: 0.125rem;
+    padding: 1rem;
+    background-color: var(--bg-output);
+    border-radius: 6px;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.perm-scope-user {
+    color: var(--accent);
+}
+
+.perm-scope-group {
+    color: #ea580c;
+}
+
+.perm-scope-other {
+    color: #4b5563;
+}
+
+.perm-numeric-display {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.25rem;
+    padding: 1rem;
+    background-color: var(--bg-output);
+    border-radius: 6px;
+    text-align: center;
+    margin-top: 0.5rem;
+    color: var(--accent);
+}
+
+.perm-chmod-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.perm-chmod-code {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-output);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    min-width: 200px;
+}
+
+/* Presets */
+.perm-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.preset-btn {
+    padding: 0.5rem 0.875rem;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.preset-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background-color: rgba(0, 102, 204, 0.05);
+}
+
+/* Explanation */
+.perm-explanation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.perm-explanation-item {
+    padding: 1rem;
+    background-color: var(--bg-output);
+    border-radius: 6px;
+}
+
+.perm-explanation-scope {
+    font-weight: 700;
+    font-size: 0.9375rem;
+    margin-bottom: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.perm-explanation-scope.perm-scope-user {
+    background-color: rgba(0, 102, 204, 0.1);
+    color: var(--accent);
+}
+
+.perm-explanation-scope.perm-scope-group {
+    background-color: rgba(234, 88, 12, 0.1);
+    color: #ea580c;
+}
+
+.perm-explanation-scope.perm-scope-other {
+    background-color: rgba(107, 114, 128, 0.1);
+    color: #4b5563;
+}
+
+.perm-explanation-value {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0.5rem 0;
+}
+
+.perm-explanation-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.8125rem;
+}
+
+.perm-explanation-list li {
+    padding: 0.25rem 0;
+    color: var(--text-secondary);
+}
+
+.perm-explanation-list li.perm-granted {
+    color: #16a34a;
+}
+
+.perm-explanation-list li.perm-denied {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.perm-special-explanation {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: rgba(234, 179, 8, 0.08);
+    border: 1px solid rgba(234, 179, 8, 0.2);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.perm-special-explanation strong {
+    color: #ca8a04;
+}
+
+.perm-special-explanation ul {
+    margin-top: 0.5rem;
+    padding-left: 1.5rem;
+}
+
+.perm-special-explanation li {
+    margin-bottom: 0.375rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .perm-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .perm-grid {
+        grid-template-columns: 90px repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+
+    .perm-grid-label {
+        font-size: 0.8125rem;
+        padding: 0.375rem 0.5rem;
+    }
+
+    .perm-symbolic-display {
+        font-size: 1.25rem;
+    }
+
+    .perm-numeric-display {
+        font-size: 1.5rem;
+    }
+}
