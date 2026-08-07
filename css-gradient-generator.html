@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Gradient Generator - Online Tools</title>
+    <meta name="description" content="Generate CSS gradients (linear and radial) with live preview. Customize colors, angles, positions, and export ready-to-use CSS. Free, no login.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>CSS Gradient Generator</h1>
+            <p>Create beautiful CSS gradients with live preview and export ready-to-use code.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Choose gradient type (linear or radial)</li>
+                <li>Add color stops and adjust their positions</li>
+                <li>Set angle (for linear) or shape/position (for radial)</li>
+                <li>Preview updates in real-time</li>
+                <li>Copy the generated CSS code</li>
+            </ol>
+        </section>
+
+        <section class="tool-area">
+            <div class="gradient-layout">
+                <!-- Controls Panel -->
+                <div class="gradient-controls">
+                    <!-- Gradient Type -->
+                    <div class="gradient-section">
+                        <label class="input-label">GRADIENT TYPE</label>
+                        <div class="gradient-type-selector">
+                            <label class="radio-label">
+                                <input type="radio" name="gradient-type" value="linear" checked>
+                                <span>Linear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gradient-type" value="radial">
+                                <span>Radial</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Linear Options -->
+                    <div id="linear-options" class="gradient-section">
+                        <label for="gradient-angle" class="input-label">ANGLE</label>
+                        <div class="gradient-angle-control">
+                            <input type="range" id="gradient-angle" min="0" max="360" value="90" class="gradient-slider">
+                            <input type="number" id="gradient-angle-input" min="0" max="360" value="90" class="gradient-number-input">
+                            <span class="gradient-unit">deg</span>
+                        </div>
+                    </div>
+
+                    <!-- Radial Options -->
+                    <div id="radial-options" class="gradient-section" style="display: none;">
+                        <label for="radial-shape" class="input-label">SHAPE</label>
+                        <select id="radial-shape" class="gradient-select">
+                            <option value="ellipse">Ellipse</option>
+                            <option value="circle">Circle</option>
+                        </select>
+
+                        <label for="radial-position" class="input-label" style="margin-top: 1rem;">POSITION</label>
+                        <select id="radial-position" class="gradient-select">
+                            <option value="center">Center</option>
+                            <option value="top">Top</option>
+                            <option value="top right">Top Right</option>
+                            <option value="right">Right</option>
+                            <option value="bottom right">Bottom Right</option>
+                            <option value="bottom">Bottom</option>
+                            <option value="bottom left">Bottom Left</option>
+                            <option value="left">Left</option>
+                            <option value="top left">Top Left</option>
+                        </select>
+                    </div>
+
+                    <!-- Color Stops -->
+                    <div class="gradient-section">
+                        <label class="input-label">COLOR STOPS</label>
+                        <div id="color-stops" class="gradient-color-stops"></div>
+                        <button id="add-stop-btn" class="btn btn-secondary" style="margin-top: 0.75rem; width: 100%;">+ Add Color Stop</button>
+                    </div>
+
+                    <!-- CSS Output -->
+                    <div class="gradient-section">
+                        <label class="input-label">GENERATED CSS</label>
+                        <pre id="gradient-css" class="gradient-css-output"><code></code></pre>
+                        <button id="copy-css-btn" class="btn btn-primary" style="margin-top: 0.75rem; width: 100%;">Copy CSS</button>
+                    </div>
+                </div>
+
+                <!-- Preview Panel -->
+                <div class="gradient-preview-panel">
+                    <label class="input-label">PREVIEW</label>
+                    <div id="gradient-preview" class="gradient-preview"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/css-gradient-generator.js"></script>
+</body>
+</html>
