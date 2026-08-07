@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Status Codes Reference - Online Tools</title>
+    <meta name="description" content="Complete reference of HTTP status codes (1xx, 2xx, 3xx, 4xx, 5xx) with descriptions, meanings, and usage examples. Free, searchable.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>HTTP Status Codes Reference</h1>
+            <p>Complete searchable reference of HTTP status codes with descriptions and usage examples.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Type a status code (e.g., "404") or keyword (e.g., "not found", "redirect")</li>
+                <li>Results update instantly as you type</li>
+                <li>Use category filters to narrow by response class (1xx, 2xx, 3xx, 4xx, 5xx)</li>
+                <li>Click any card to see full details</li>
+            </ol>
+        </section>
+
+        <section class="tool-area">
+            <!-- Search and Filters -->
+            <div class="http-controls">
+                <div class="http-search-wrapper">
+                    <input type="text" id="http-search" class="http-search-input" placeholder="Search by code, name, or description (e.g., 404, not found, redirect)..." autocomplete="off">
+                </div>
+
+                <div class="http-filters">
+                    <div class="http-filter-group">
+                        <label class="input-label">CATEGORY</label>
+                        <div class="http-radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="category-filter" value="all" checked>
+                                <span>All</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="category-filter" value="1xx">
+                                <span>1xx Informational</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="category-filter" value="2xx">
+                                <span>2xx Success</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="category-filter" value="3xx">
+                                <span>3xx Redirection</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="category-filter" value="4xx">
+                                <span>4xx Client Error</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="category-filter" value="5xx">
+                                <span>5xx Server Error</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Count -->
+            <div id="http-results-count" class="http-results-count"></div>
+
+            <!-- Results Grid -->
+            <div id="http-results" class="http-results"></div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/http-status-codes.js"></script>
+</body>
+</html>
