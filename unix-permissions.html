@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unix Permission Calculator - Online Tools</title>
+    <meta name="description" content="Convert Unix file permissions between numeric (755) and symbolic (rwxr-xr-x) formats. Includes chmod command generator and detailed explanations. Free, client-side.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>Unix Permission Calculator</h1>
+            <p>Convert Unix file permissions between numeric (755) and symbolic (rwxr-xr-x) formats.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Choose a conversion mode: "Checkboxes → Numeric" or "Numeric → Checkboxes"</li>
+                <li>Toggle the checkboxes or enter a numeric value</li>
+                <li>The conversion and chmod command update automatically</li>
+                <li>Enable "Special bits" for setuid, setgid, and sticky bit</li>
+                <li>Copy the chmod command to your clipboard</li>
+            </ol>
+        </section>
+
+        <section class="tool-area">
+            <!-- Mode Selector -->
+            <div class="perm-section">
+                <label class="input-label">CONVERSION MODE</label>
+                <div class="perm-mode-selector">
+                    <label class="radio-label">
+                        <input type="radio" name="perm-mode" value="checkbox" checked>
+                        <span>Checkboxes → Numeric</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="perm-mode" value="numeric">
+                        <span>Numeric → Checkboxes</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Main Layout -->
+            <div class="perm-layout">
+                <!-- Permissions Grid -->
+                <div class="perm-grid-section">
+                    <label class="input-label">PERMISSIONS</label>
+                    <div class="perm-grid">
+                        <div class="perm-grid-header"></div>
+                        <div class="perm-grid-header">Read (4)</div>
+                        <div class="perm-grid-header">Write (2)</div>
+                        <div class="perm-grid-header">Execute (1)</div>
+
+                        <div class="perm-grid-label perm-user">Owner (User)</div>
+                        <div class="perm-grid-cell"><input type="checkbox" class="perm-checkbox" data-scope="user" data-perm="read"></div>
+                        <div class="perm-grid-cell"><input type="checkbox" class="perm-checkbox" data-scope="user" data-perm="write"></div>
+                        <div class="perm-grid-cell"><input type="checkbox" class="perm-checkbox" data-scope="user" data-perm="execute"></div>
+
+                        <div class="perm-grid-label perm-group">Group</div>
+                        <div class="perm-grid-cell"><input type="checkbox" class="perm-checkbox" data-scope="group" data-perm="read"></div>
+                        <div class="perm-grid-cell"><input type="checkbox" class="perm-checkbox" data-scope="group" data-perm="write"></div>
+                        <div class="perm-grid-cell"><input type="checkbox" class="perm-checkbox" data-scope="group" data-perm="execute"></div>
+
+                        <div class="perm-grid-label perm-other">Others</div>
+                        <div class="perm-grid-cell"><input type="checkbox" class="perm-checkbox" data-scope="other" data-perm="read"></div>
+                        <div class="perm-grid-cell"><input type="checkbox" class="perm-checkbox" data-scope="other" data-perm="write"></div>
+                        <div class="perm-grid-cell"><input type="checkbox" class="perm-checkbox" data-scope="other" data-perm="execute"></div>
+                    </div>
+
+                    <!-- Numeric Input -->
+                    <div class="perm-numeric-section">
+                        <label for="perm-numeric" class="input-label">NUMERIC VALUE</label>
+                        <div class="perm-numeric-row">
+                            <input type="text" id="perm-numeric" class="perm-numeric-input" placeholder="755" maxlength="4">
+                        </div>
+                    </div>
+
+                    <!-- Special Bits Toggle -->
+                    <div class="perm-special-section">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="show-special-bits">
+                            <span>Show special bits (setuid, setgid, sticky)</span>
+                        </label>
+                    </div>
+
+                    <!-- Special Bits (hidden by default) -->
+                    <div id="special-bits-section" class="perm-special-bits" style="display: none;">
+                        <label class="input-label">SPECIAL BITS</label>
+                        <div class="perm-special-grid">
+                            <label class="perm-special-item">
+                                <input type="checkbox" id="setuid" class="special-checkbox">
+                                <div class="perm-special-info">
+                                    <strong>SetUID (4)</strong>
+                                    <span>Execute as file owner</span>
+                                </div>
+                            </label>
+                            <label class="perm-special-item">
+                                <input type="checkbox" id="setgid" class="special-checkbox">
+                                <div class="perm-special-info">
+                                    <strong>SetGID (2)</strong>
+                                    <span>Execute as file group</span>
+                                </div>
+                            </label>
+                            <label class="perm-special-item">
+                                <input type="checkbox" id="sticky" class="special-checkbox">
+                                <div class="perm-special-info">
+                                    <strong>Sticky (1)</strong>
+                                    <span>Restrict deletion (e.g., /tmp)</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Panel -->
+                <div class="perm-results-section">
+                    <!-- Symbolic Display -->
+                    <div class="perm-result-block">
+                        <label class="input-label">SYMBOLIC FORMAT</label>
+                        <div id="perm-symbolic" class="perm-symbolic-display">---------</div>
+                    </div>
+
+                    <!-- Numeric Display -->
+                    <div class="perm-result-block">
+                        <label class="input-label">NUMERIC FORMAT</label>
+                        <div id="perm-numeric-display" class="perm-numeric-display">000</div>
+                    </div>
+
+                    <!-- Chmod Command -->
+                    <div class="perm-result-block">
+                        <label class="input-label">CHMOD COMMAND</label>
+                        <div class="perm-chmod-row">
+                            <code id="perm-chmod" class="perm-chmod-code">chmod 000 filename</code>
+                            <button id="copy-chmod-btn" class="btn btn-secondary">Copy</button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Presets -->
+                    <div class="perm-result-block">
+                        <label class="input-label">COMMON PRESETS</label>
+                        <div class="perm-presets">
+                            <button class="preset-btn" data-value="644">644 (rw-r--r--)</button>
+                            <button class="preset-btn" data-value="755">755 (rwxr-xr-x)</button>
+                            <button class="preset-btn" data-value="600">600 (rw-------)</button>
+                            <button class="preset-btn" data-value="700">700 (rwx------)</button>
+                            <button class="preset-btn" data-value="640">640 (rw-r-----)</button>
+                            <button class="preset-btn" data-value="775">775 (rwxrwxr-x)</button>
+                            <button class="preset-btn" data-value="4755">4755 (setuid)</button>
+                            <button class="preset-btn" data-value="1777">1777 (sticky)</button>
+                        </div>
+                    </div>
+
+                    <!-- Explanation -->
+                    <div class="perm-result-block">
+                        <label class="input-label">EXPLANATION</label>
+                        <div id="perm-explanation" class="perm-explanation"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/unix-permissions.js"></script>
+</body>
+</html>
