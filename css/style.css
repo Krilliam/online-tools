@@ -1368,3 +1368,167 @@ pre code {
         gap: 1rem;
     }
 }
+
+/* =========================================
+   HTTP Status Codes Reference Specifics
+   ========================================= */
+.http-controls {
+    margin-bottom: 2rem;
+}
+
+.http-search-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.http-search-input {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    border: 2px solid var(--border-card);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: var(--font-ui);
+    background-color: var(--bg-card);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.http-search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.http-filters {
+    margin-bottom: 1.5rem;
+}
+
+.http-filter-group {
+    margin-bottom: 1rem;
+}
+
+.http-radio-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.http-results-count {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.http-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1rem;
+}
+
+.http-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+    padding: 1.25rem;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.http-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: var(--accent);
+}
+
+.http-card-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.http-code {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.http-name {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.http-card-body {
+    font-size: 0.9375rem;
+}
+
+.http-description {
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.http-usage {
+    padding: 0.75rem;
+    background-color: var(--bg-output);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.http-usage strong {
+    color: var(--accent);
+}
+
+.http-card mark {
+    background-color: rgba(0, 102, 204, 0.15);
+    color: var(--accent);
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+/* Category-specific colors */
+.http-category-1xx {
+    border-left: 4px solid #0ea5e9;
+}
+
+.http-category-2xx {
+    border-left: 4px solid #22c55e;
+}
+
+.http-category-3xx {
+    border-left: 4px solid #f59e0b;
+}
+
+.http-category-4xx {
+    border-left: 4px solid #ef4444;
+}
+
+.http-category-5xx {
+    border-left: 4px solid #8b5cf6;
+}
+
+.http-empty,
+.http-error {
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 3rem 1rem;
+    grid-column: 1 / -1;
+}
+
+.http-error {
+    color: #b91c1c;
+}
+
+@media (max-width: 768px) {
+    .http-results {
+        grid-template-columns: 1fr;
+    }
+
+    .http-radio-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
