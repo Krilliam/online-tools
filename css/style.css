@@ -2158,69 +2158,27 @@ pre code {
 }
 
 /* =========================================
-   Suggest Tool Section
+   Suggest Tool Section (discreto)
    ========================================= */
 .suggest-section {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
 }
 
-.suggest-box {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    padding: 1.5rem 2rem;
-    background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(0, 204, 255, 0.05) 100%);
-    border: 2px solid var(--accent);
-    border-radius: 12px;
-    flex-wrap: wrap;
-}
-
-.suggest-content {
-    flex: 1;
-    min-width: 250px;
-}
-
-.suggest-content h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-primary);
-}
-
-.suggest-content p {
-    color: var(--text-secondary);
+.suggest-text {
     font-size: 0.9375rem;
-    line-height: 1.5;
+    color: var(--text-secondary);
     margin: 0;
 }
 
-.suggest-btn {
-    padding: 0.875rem 1.75rem;
-    background-color: var(--accent);
-    color: white;
+.suggest-link {
+    color: var(--accent);
     text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.2s;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);
+    font-weight: 500;
+    transition: color 0.2s;
 }
 
-.suggest-btn:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
-}
-
-@media (max-width: 768px) {
-    .suggest-box {
-        flex-direction: column;
-        text-align: center;
-        padding: 1.5rem;
-    }
-
-    .suggest-btn {
-        width: 100%;
-    }
+.suggest-link:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
 }
