@@ -116,6 +116,15 @@
       "category": "frontend",
       "tags": ["css", "gradient", "linear", "radial", "frontend", "design", "web"],
       "status": "live"
+    },
+    {
+      "id": "unix-permissions",
+      "name": "Unix Permission Calculator",
+      "description": "Convert Unix file permissions between numeric (755) and symbolic (rwxr-xr-x) formats with chmod command generator.",
+      "url": "unix-permissions.html",
+      "category": "devops",
+      "tags": ["unix", "linux", "permissions", "chmod", "rwx", "devops", "sysadmin"],
+      "status": "live"
     }
   ]
 }
