@@ -129,7 +129,7 @@
                             <div class="csv-extract-options">
                                 <label class="radio-label">
                                     <input type="radio" name="csv-extract-mode" value="column" checked>
-                                    <span>As column (normal output)</span>
+                                    <span>As column (preview + download CSV)</span>
                                 </label>
                                 <label class="radio-label">
                                     <input type="radio" name="csv-extract-mode" value="string">
@@ -151,15 +151,16 @@
                             </div>
                             <button id="csv-extract-btn" class="btn btn-primary" style="margin-top: 0.75rem;">Extract</button>
                         </div>
-                        <div id="csv-extract-output" class="csv-extract-output" style="display: none;"></div>
+                        <!-- Textarea for string mode (inline) -->
+                        <div id="csv-extract-string-output" class="csv-extract-output" style="display: none;"></div>
                     </div>
 
                     <!-- Reorder Columns -->
                     <div class="csv-column-tool">
                         <h3>Reorder Columns</h3>
-                        <p class="csv-column-tool-desc">Drag columns to reorder them in the output</p>
+                        <p class="csv-column-tool-desc">Drag columns to reorder them. Click "Preview & Export" to see results in a popup and download as CSV.</p>
                         <div id="csv-reorder-list" class="csv-reorder-list"></div>
-                        <button id="csv-reorder-apply-btn" class="btn btn-primary" style="margin-top: 0.75rem;">Apply Order</button>
+                        <button id="csv-reorder-preview-btn" class="btn btn-primary" style="margin-top: 0.75rem;">Preview & Export</button>
                     </div>
                 </div>
             </div>
@@ -168,6 +169,24 @@
             <div id="csv-error" class="error-message" style="display: none;"></div>
         </section>
     </main>
+
+    <!-- Generic Modal -->
+    <div id="csv-modal" class="csv-modal" style="display: none;">
+        <div class="csv-modal-overlay"></div>
+        <div class="csv-modal-container">
+            <div class="csv-modal-header">
+                <h3 id="csv-modal-title">Preview</h3>
+                <button id="csv-modal-close" class="csv-modal-close-btn">&times;</button>
+            </div>
+            <div id="csv-modal-info" class="csv-modal-info"></div>
+            <div id="csv-modal-body" class="csv-modal-body"></div>
+            <div class="csv-modal-footer">
+                <button id="csv-modal-download-csv" class="btn btn-primary">Download CSV</button>
+                <button id="csv-modal-copy" class="btn btn-secondary">Copy</button>
+                <button id="csv-modal-close-footer" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
 
     <div id="footer"></div>
 
