@@ -21,6 +21,7 @@
         <section class="how-to">
             <h2>How to use</h2>
             <ol>
+                <li>Configure upload settings (delimiter and header option)</li>
                 <li>Upload one or more CSV files (max 50MB each)</li>
                 <li>Write SQL queries using the file names as table names</li>
                 <li>Click "Run Query" to execute and see results</li>
@@ -34,13 +35,38 @@
         </section>
 
         <section class="tool-area">
+            <!-- Upload Settings Section -->
+            <div class="csv-section">
+                <label class="input-label">UPLOAD SETTINGS</label>
+                <div class="csv-upload-settings">
+                    <div class="csv-setting-group">
+                        <label for="csv-delimiter" class="input-label">DELIMITER</label>
+                        <select id="csv-delimiter" class="csv-select">
+                            <option value=",">Comma (,)</option>
+                            <option value=";">Semicolon (;)</option>
+                            <option value="	">Tab</option>
+                            <option value="|">Pipe (|)</option>
+                            <option value="custom">Custom...</option>
+                        </select>
+                        <input type="text" id="csv-delimiter-custom" class="csv-input" placeholder="Enter custom delimiter" style="display: none; margin-top: 0.5rem;">
+                    </div>
+                    <div class="csv-setting-group">
+                        <label class="input-label">HEADER</label>
+                        <label class="checkbox-label" style="margin-top: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="csv-has-header" checked>
+                            <span>First row contains headers</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             <!-- File Upload Section -->
             <div class="csv-section">
                 <label class="input-label">CSV FILES</label>
                 <div id="csv-drop-zone" class="csv-drop-zone">
                     <p>Drop CSV files here or click to upload</p>
                     <p class="csv-drop-hint">Max 50MB per file</p>
-                    <input type="file" id="csv-file-input" accept=".csv" multiple style="display: none;">
+                    <input type="file" id="csv-file-input" accept=".csv,.txt,.tsv" multiple style="display: none;">
                 </div>
                 <div id="csv-file-list" class="csv-file-list"></div>
             </div>
