@@ -133,7 +133,7 @@
       "url": "csv-query-tool.html",
       "category": "database",
       "tags": ["csv", "sql", "query", "database", "data", "analysis", "filter", "export"],
-      "status": "live"
+      "status": "wip"
     }
   ]
 }
