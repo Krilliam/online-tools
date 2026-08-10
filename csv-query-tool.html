@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Query Tool - Online Tools</title>
+    <meta name="description" content="Execute SQL queries on CSV files. Filter, group, join, and analyze data with SQL syntax. Export results to CSV or JSON. Free, client-side.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main>
+        <a href="index.html" class="back-link">&larr; All tools</a>
+
+        <section class="tool-header">
+            <h1>CSV Query Tool</h1>
+            <p>Execute SQL queries on CSV files. Filter, group, join, and analyze data with SQL syntax.</p>
+        </section>
+
+        <section class="how-to">
+            <h2>How to use</h2>
+            <ol>
+                <li>Upload one or more CSV files (max 50MB each)</li>
+                <li>Write SQL queries using the file names as table names</li>
+                <li>Click "Run Query" to execute and see results</li>
+                <li>Export results to CSV or JSON, or copy to clipboard</li>
+            </ol>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                <strong>Supported SQL:</strong> SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY, LIMIT, OFFSET, JOIN, DISTINCT, 
+                aggregate functions (COUNT, SUM, AVG, MIN, MAX), string functions (UPPER, LOWER, TRIM, LENGTH, SUBSTRING, CONCAT), 
+                and operators (=, !=, <, >, <=, >=, LIKE, IN, BETWEEN, AND, OR, NOT, IS NULL, IS NOT NULL).
+            </p>
+        </section>
+
+        <section class="tool-area">
+            <!-- File Upload Section -->
+            <div class="csv-section">
+                <label class="input-label">CSV FILES</label>
+                <div id="csv-drop-zone" class="csv-drop-zone">
+                    <p>Drop CSV files here or click to upload</p>
+                    <p class="csv-drop-hint">Max 50MB per file</p>
+                    <input type="file" id="csv-file-input" accept=".csv" multiple style="display: none;">
+                </div>
+                <div id="csv-file-list" class="csv-file-list"></div>
+            </div>
+
+            <!-- Table Preview Section -->
+            <div id="csv-preview-section" class="csv-section" style="display: none;">
+                <label class="input-label">TABLE PREVIEW</label>
+                <div class="csv-preview-controls">
+                    <select id="csv-preview-select" class="csv-select">
+                        <option value="">Select a file to preview</option>
+                    </select>
+                </div>
+                <div id="csv-preview-table" class="csv-table-wrapper"></div>
+            </div>
+
+            <!-- SQL Query Section -->
+            <div class="csv-section">
+                <label for="csv-sql-input" class="input-label">SQL QUERY</label>
+                <textarea id="csv-sql-input" class="csv-sql-input" rows="8" placeholder="SELECT * FROM users WHERE age > 18 ORDER BY name"></textarea>
+                <div class="csv-query-controls">
+                    <div class="csv-query-buttons">
+                        <button id="csv-run-btn" class="btn btn-primary">Run Query</button>
+                        <button id="csv-clear-btn" class="btn btn-secondary">Clear</button>
+                        <button id="csv-examples-btn" class="btn btn-secondary">Examples ▼</button>
+                    </div>
+                    <div id="csv-examples-dropdown" class="csv-examples-dropdown" style="display: none;">
+                        <div class="csv-example-item" data-query="SELECT * FROM users LIMIT 10">Select first 10 rows</div>
+                        <div class="csv-example-item" data-query="SELECT name, age FROM users WHERE age > 25 ORDER BY age DESC">Filter and sort</div>
+                        <div class="csv-example-item" data-query="SELECT city, COUNT(*) as total FROM users GROUP BY city ORDER BY total DESC">Group by with count</div>
+                        <div class="csv-example-item" data-query="SELECT city, AVG(age) as avg_age FROM users GROUP BY city HAVING COUNT(*) > 5">Group with having</div>
+                        <div class="csv-example-item" data-query="SELECT DISTINCT city FROM users ORDER BY city">Distinct values</div>
+                        <div class="csv-example-item" data-query="SELECT u.name, o.total FROM users u JOIN orders o ON u.id = o.user_id WHERE o.total > 100">Join tables</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="csv-results-section" class="csv-section" style="display: none;">
+                <label class="input-label">RESULTS</label>
+                <div id="csv-results-info" class="csv-results-info"></div>
+                <div id="csv-results-table" class="csv-table-wrapper"></div>
+                <div class="csv-export-controls">
+                    <button id="csv-export-csv-btn" class="btn btn-secondary">Export CSV</button>
+                    <button id="csv-export-json-btn" class="btn btn-secondary">Export JSON</button>
+                    <button id="csv-copy-btn" class="btn btn-secondary">Copy</button>
+                </div>
+            </div>
+
+            <!-- Column Tools Section -->
+            <div id="csv-column-tools-section" class="csv-section" style="display: none;">
+                <label class="input-label">COLUMN TOOLS</label>
+                <div class="csv-column-tools-grid">
+                    <!-- Extract Column -->
+                    <div class="csv-column-tool">
+                        <h3>Extract Column</h3>
+                        <div class="csv-column-tool-controls">
+                            <select id="csv-extract-column-select" class="csv-select">
+                                <option value="">Select column</option>
+                            </select>
+                            <div class="csv-extract-options">
+                                <label class="radio-label">
+                                    <input type="radio" name="csv-extract-mode" value="column" checked>
+                                    <span>As column (normal output)</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="csv-extract-mode" value="string">
+                                    <span>As single string</span>
+                                </label>
+                            </div>
+                            <div id="csv-extract-separator-section" style="display: none;">
+                                <label for="csv-extract-separator" class="input-label">SEPARATOR</label>
+                                <select id="csv-extract-separator" class="csv-select">
+                                    <option value=",">Comma (,)</option>
+                                    <option value=";">Semicolon (;)</option>
+                                    <option value="	">Tab</option>
+                                    <option value="|">Pipe (|)</option>
+                                    <option value="\n">Newline</option>
+                                    <option value=" ">Space</option>
+                                    <option value="custom">Custom...</option>
+                                </select>
+                                <input type="text" id="csv-extract-separator-custom" class="csv-input" placeholder="Enter custom separator" style="display: none; margin-top: 0.5rem;">
+                            </div>
+                            <button id="csv-extract-btn" class="btn btn-primary" style="margin-top: 0.75rem;">Extract</button>
+                        </div>
+                        <div id="csv-extract-output" class="csv-extract-output" style="display: none;"></div>
+                    </div>
+
+                    <!-- Reorder Columns -->
+                    <div class="csv-column-tool">
+                        <h3>Reorder Columns</h3>
+                        <p class="csv-column-tool-desc">Drag columns to reorder them in the output</p>
+                        <div id="csv-reorder-list" class="csv-reorder-list"></div>
+                        <button id="csv-reorder-apply-btn" class="btn btn-primary" style="margin-top: 0.75rem;">Apply Order</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="csv-error" class="error-message" style="display: none;"></div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/csv-query-tool.js"></script>
+</body>
+</html>
