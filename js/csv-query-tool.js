@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // DOM ELEMENTS
     // ==========================================
+    const delimiterSelect = document.getElementById('csv-delimiter');
+    const delimiterCustom = document.getElementById('csv-delimiter-custom');
+    const hasHeaderCheckbox = document.getElementById('csv-has-header');
     const dropZone = document.getElementById('csv-drop-zone');
     const fileInput = document.getElementById('csv-file-input');
     const fileList = document.getElementById('csv-file-list');
@@ -34,14 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // STATE
     // ==========================================
-    const csvFiles = new Map(); // Map<filename, {headers: string[], rows: any[][]}>
+    const csvFiles = new Map(); // Map<filename, {headers: string[], rows: any[][], delimiter: string, hasHeader: boolean}>
     let lastQueryResult = null;
     const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
     // ==========================================
     // CSV PARSER
     // ==========================================
-    function parseCSV(text) {
+    function parseCSV(text, delimiter, hasHeader) {
         const lines = text.trim().split(/\r?\n/);
         if (lines.length === 0) throw new Error('CSV file is empty');
 
@@ -61,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         inQuotes = !inQuotes;
                     }
-                } else if (char === ',' && !inQuotes) {
+                } else if (char === delimiter && !inQuotes) {
                     result.push(current.trim());
                     current = '';
                 } else {
@@ -72,10 +75,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return result;
         }
 
-        const headers = parseLine(lines[0]);
-        const rows = [];
+        let headers = [];
+        let dataStartIndex = 0;
 
-        for (let i = 1; i < lines.length; i++) {
+        if (hasHeader) {
+            if (lines.length < 2) {
+                throw new Error('CSV must have at least a header row and one data row when "First row contains headers" is checked.');
+            }
+            headers = parseLine(lines[0]);
+            dataStartIndex = 1;
+        } else {
+            // Generate generic headers based on first row column count
+            const firstRow = parseLine(lines[0]);
+            headers = firstRow.map((_, index) => `col${index + 1}`);
+            dataStartIndex = 0;
+        }
+
+        const rows = [];
+        for (let i = dataStartIndex; i < lines.length; i++) {
             if (!lines[i].trim()) continue;
             const values = parseLine(lines[i]);
             
@@ -92,6 +109,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         return { headers, rows };
+    }
+
+    // ==========================================
+    // DELIMITER SETTINGS
+    // ==========================================
+    delimiterSelect.addEventListener('change', () => {
+        delimiterCustom.style.display = delimiterSelect.value === 'custom' ? '' : 'none';
+    });
+
+    function getDelimiter() {
+        if (delimiterSelect.value === 'custom') {
+            return delimiterCustom.value || ',';
+        }
+        return delimiterSelect.value;
     }
 
     // ==========================================
@@ -119,6 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function handleFiles(files) {
+        const delimiter = getDelimiter();
+        const hasHeader = hasHeaderCheckbox.checked;
+
         Array.from(files).forEach(file => {
             if (file.size > MAX_FILE_SIZE) {
                 showError(`File "${file.name}" exceeds 50MB limit`);
@@ -128,8 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
-                    const data = parseCSV(e.target.result);
-                    csvFiles.set(file.name, data);
+                    const data = parseCSV(e.target.result, delimiter, hasHeader);
+                    csvFiles.set(file.name, {
+                        ...data,
+                        delimiter: delimiter,
+                        hasHeader: hasHeader
+                    });
                     updateFileList();
                     updatePreviewSelect();
                     updateColumnTools();
@@ -147,8 +185,21 @@ document.addEventListener('DOMContentLoaded', () => {
         csvFiles.forEach((data, filename) => {
             const item = document.createElement('div');
             item.className = 'csv-file-item';
+            
+            const delimiterDisplay = data.delimiter === '\t' ? 'Tab' : 
+                                    data.delimiter === ',' ? 'Comma' : 
+                                    data.delimiter === ';' ? 'Semicolon' : 
+                                    data.delimiter === '|' ? 'Pipe' : 
+                                    `"${data.delimiter}"`;
+            
+            const headerDisplay = data.hasHeader ? 'With header' : 'No header';
+            
             item.innerHTML = `
-                <span>✓ ${filename} (${data.rows.length} rows, ${data.headers.length} columns)</span>
+                <div class="csv-file-info">
+                    <span class="csv-file-name">✓ ${filename}</span>
+                    <span class="csv-file-stats">(${data.rows.length} rows, ${data.headers.length} columns)</span>
+                    <span class="csv-file-settings">${delimiterDisplay} | ${headerDisplay}</span>
+                </div>
                 <button class="csv-file-remove" data-filename="${filename}">Remove</button>
             `;
             fileList.appendChild(item);
@@ -347,7 +398,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentClause = 'offset';
                 i++;
             } else if (token.value === 'JOIN' || token.value === 'LEFT' || token.value === 'RIGHT' || token.value === 'INNER') {
-                // Simplified JOIN handling
                 currentClause = 'from';
                 i++;
             } else {
@@ -413,7 +463,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = {};
                 ast.groupBy.forEach(col => result[col] = group[0][col]);
                 
-                // Aggregate functions
                 ast.select.forEach(sel => {
                     const match = sel.match(/(COUNT|SUM|AVG|MIN|MAX)\((\*|\w+)\)/i);
                     if (match) {
@@ -484,8 +533,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function evaluateWhere(row, condition) {
-        // Simplified WHERE evaluation
-        // Supports: col = val, col != val, col < val, col > val, col LIKE val, col IS NULL, col IS NOT NULL
         const match = condition.match(/^(\w+)\s*(=|!=|<|>|<=|>=|LIKE)\s*'?([^']*)'?$/i);
         if (match) {
             const [, col, op, val] = match;
@@ -513,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return row[col] !== null && row[col] !== undefined;
         }
 
-        return true; // Default to true if can't parse
+        return true;
     }
 
     // ==========================================
@@ -633,7 +680,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const firstFile = csvFiles.values().next().value;
         const headers = firstFile.headers;
 
-        // Extract column select
         extractColumnSelect.innerHTML = '<option value="">Select column</option>';
         headers.forEach(h => {
             const option = document.createElement('option');
@@ -642,7 +688,6 @@ document.addEventListener('DOMContentLoaded', () => {
             extractColumnSelect.appendChild(option);
         });
 
-        // Reorder list
         reorderList.innerHTML = '';
         headers.forEach(h => {
             const item = document.createElement('div');
@@ -653,7 +698,6 @@ document.addEventListener('DOMContentLoaded', () => {
             reorderList.appendChild(item);
         });
 
-        // Drag and drop for reorder
         let draggedItem = null;
         reorderList.querySelectorAll('.csv-reorder-item').forEach(item => {
             item.addEventListener('dragstart', (e) => {
@@ -685,7 +729,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Extract mode toggle
     extractModeRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             extractSeparatorSection.style.display = radio.value === 'string' && radio.checked ? '' : 'none';
