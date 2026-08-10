@@ -125,6 +125,15 @@
       "category": "devops",
       "tags": ["unix", "linux", "permissions", "chmod", "rwx", "devops", "sysadmin"],
       "status": "live"
+    },
+    {
+      "id": "csv-query-tool",
+      "name": "CSV Query Tool",
+      "description": "Execute SQL queries on CSV files. Filter, group, join, and analyze data with SQL syntax. Export results to CSV or JSON.",
+      "url": "csv-query-tool.html",
+      "category": "database",
+      "tags": ["csv", "sql", "query", "database", "data", "analysis", "filter", "export"],
+      "status": "live"
     }
   ]
 }
