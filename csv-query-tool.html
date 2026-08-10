@@ -23,15 +23,53 @@
             <ol>
                 <li>Configure upload settings (delimiter and header option)</li>
                 <li>Upload one or more CSV files (max 50MB each)</li>
-                <li>Write SQL queries using the file names as table names</li>
+                <li>Table names are the file names without extension (e.g., <code>users.csv</code> → <code>users</code>)</li>
+                <li>Write SQL queries using the table names</li>
                 <li>Click "Run Query" to execute and see results</li>
                 <li>Export results to CSV or JSON, or copy to clipboard</li>
             </ol>
-            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
-                <strong>Supported SQL:</strong> SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY, LIMIT, OFFSET, JOIN, DISTINCT, 
-                aggregate functions (COUNT, SUM, AVG, MIN, MAX), string functions (UPPER, LOWER, TRIM, LENGTH, SUBSTRING, CONCAT), 
-                and operators (=, !=, <, >, <=, >=, LIKE, IN, BETWEEN, AND, OR, NOT, IS NULL, IS NOT NULL).
-            </p>
+
+            <details style="margin-top: 1.5rem;">
+                <summary style="cursor: pointer; font-weight: 600; color: var(--accent); user-select: none;">
+                    SQL Syntax Reference
+                </summary>
+                <div style="margin-top: 1rem; padding: 1rem; background-color: var(--bg-output); border-radius: 6px; font-size: 0.875rem;">
+                    <p><strong>Table names:</strong> Use file names without extension (e.g., <code>users</code> for <code>users.csv</code>)</p>
+                    
+                    <p style="margin-top: 1rem;"><strong>Basic queries:</strong></p>
+                    <pre style="background-color: var(--bg-card); padding: 0.75rem; border-radius: 4px; overflow-x: auto; margin: 0.5rem 0;">SELECT * FROM users
+SELECT name, age FROM users WHERE age > 25
+SELECT * FROM users ORDER BY age DESC
+SELECT * FROM users LIMIT 10 OFFSET 20</pre>
+
+                    <p style="margin-top: 1rem;"><strong>Filtering (WHERE):</strong></p>
+                    <pre style="background-color: var(--bg-card); padding: 0.75rem; border-radius: 4px; overflow-x: auto; margin: 0.5rem 0;">WHERE age = 30
+WHERE age > 25 AND city = 'Rome'
+WHERE age BETWEEN 20 AND 40
+WHERE city IN ('Rome', 'Milan', 'Naples')
+WHERE name LIKE '%John%'
+WHERE email IS NULL
+WHERE email IS NOT NULL</pre>
+
+                    <p style="margin-top: 1rem;"><strong>Aggregation (GROUP BY):</strong></p>
+                    <pre style="background-color: var(--bg-card); padding: 0.75rem; border-radius: 4px; overflow-x: auto; margin: 0.5rem 0;">SELECT city, COUNT(*) FROM users GROUP BY city
+SELECT city, AVG(age) FROM users GROUP BY city
+SELECT city, SUM(salary) FROM users GROUP BY city HAVING COUNT(*) > 5</pre>
+
+                    <p style="margin-top: 1rem;"><strong>JOIN (multiple files):</strong></p>
+                    <pre style="background-color: var(--bg-card); padding: 0.75rem; border-radius: 4px; overflow-x: auto; margin: 0.5rem 0;">SELECT u.name, o.total 
+FROM users u 
+JOIN orders o ON u.id = o.user_id
+
+SELECT u.name, o.total 
+FROM users u 
+LEFT JOIN orders o ON u.id = o.user_id</pre>
+
+                    <p style="margin-top: 1rem;"><strong>Operators:</strong> <code>=</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, <code>LIKE</code>, <code>IN</code>, <code>BETWEEN</code>, <code>IS NULL</code>, <code>IS NOT NULL</code>, <code>AND</code>, <code>OR</code>, <code>NOT</code></p>
+                    
+                    <p style="margin-top: 1rem;"><strong>Aggregate functions:</strong> <code>COUNT(*)</code>, <code>SUM(col)</code>, <code>AVG(col)</code>, <code>MIN(col)</code>, <code>MAX(col)</code></p>
+                </div>
+            </details>
         </section>
 
         <section class="tool-area">
@@ -92,14 +130,7 @@
                         <button id="csv-clear-btn" class="btn btn-secondary">Clear</button>
                         <button id="csv-examples-btn" class="btn btn-secondary">Examples ▼</button>
                     </div>
-                    <div id="csv-examples-dropdown" class="csv-examples-dropdown" style="display: none;">
-                        <div class="csv-example-item" data-query="SELECT * FROM users LIMIT 10">Select first 10 rows</div>
-                        <div class="csv-example-item" data-query="SELECT name, age FROM users WHERE age > 25 ORDER BY age DESC">Filter and sort</div>
-                        <div class="csv-example-item" data-query="SELECT city, COUNT(*) as total FROM users GROUP BY city ORDER BY total DESC">Group by with count</div>
-                        <div class="csv-example-item" data-query="SELECT city, AVG(age) as avg_age FROM users GROUP BY city HAVING COUNT(*) > 5">Group with having</div>
-                        <div class="csv-example-item" data-query="SELECT DISTINCT city FROM users ORDER BY city">Distinct values</div>
-                        <div class="csv-example-item" data-query="SELECT u.name, o.total FROM users u JOIN orders o ON u.id = o.user_id WHERE o.total > 100">Join tables</div>
-                    </div>
+                    <div id="csv-examples-dropdown" class="csv-examples-dropdown" style="display: none;"></div>
                 </div>
             </div>
 
@@ -151,7 +182,6 @@
                             </div>
                             <button id="csv-extract-btn" class="btn btn-primary" style="margin-top: 0.75rem;">Extract</button>
                         </div>
-                        <!-- Textarea for string mode (inline) -->
                         <div id="csv-extract-string-output" class="csv-extract-output" style="display: none;"></div>
                     </div>
 
