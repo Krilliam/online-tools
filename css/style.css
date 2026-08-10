@@ -2535,3 +2535,45 @@ pre code {
         padding: 0.625rem 0.75rem;
     }
 }
+/* =========================================
+   CSV Query Tool - Upload Settings
+   ========================================= */
+.csv-upload-settings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.csv-setting-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.csv-file-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.csv-file-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.csv-file-stats {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.csv-file-settings {
+    font-size: 0.8125rem;
+    color: var(--accent);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .csv-upload-settings {
+        grid-template-columns: 1fr;
+    }
+}
