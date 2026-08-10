@@ -37,9 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // STATE
     // ==========================================
-    const csvFiles = new Map(); // Map<filename, {headers: string[], rows: any[][], delimiter: string, hasHeader: boolean}>
+    const csvFiles = new Map();
     let lastQueryResult = null;
-    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+    const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
     // ==========================================
     // CSV PARSER
@@ -85,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
             headers = parseLine(lines[0]);
             dataStartIndex = 1;
         } else {
-            // Generate generic headers based on first row column count
             const firstRow = parseLine(lines[0]);
             headers = firstRow.map((_, index) => `col${index + 1}`);
             dataStartIndex = 0;
@@ -96,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!lines[i].trim()) continue;
             const values = parseLine(lines[i]);
             
-            // Type inference
             const typedValues = values.map(val => {
                 if (val === '') return null;
                 if (val === 'true') return true;
@@ -290,7 +288,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // SQL PARSER (Simplified)
+    // SQL KEYWORDS (for case-insensitive matching)
+    // ==========================================
+    const SQL_KEYWORDS = new Set([
+        'SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'NOT', 'IN', 'LIKE', 'BETWEEN',
+        'IS', 'NULL', 'AS', 'DISTINCT', 'GROUP', 'BY', 'HAVING', 'ORDER',
+        'ASC', 'DESC', 'LIMIT', 'OFFSET', 'JOIN', 'LEFT', 'RIGHT', 'INNER',
+        'OUTER', 'ON', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'CASE', 'WHEN',
+        'THEN', 'ELSE', 'END', 'TRUE', 'FALSE'
+    ]);
+
+    // ==========================================
+    // CASE-INSENSITIVE TABLE LOOKUP
+    // ==========================================
+    function findTable(name) {
+        // Exact match first
+        if (csvFiles.has(name)) {
+            return { name, data: csvFiles.get(name) };
+        }
+        
+        // Case-insensitive match
+        const lowerName = name.toLowerCase();
+        for (const [filename, data] of csvFiles.entries()) {
+            if (filename.toLowerCase() === lowerName) {
+                return { name: filename, data };
+            }
+        }
+        
+        // Try without extension (e.g., "file" matches "file.csv")
+        for (const [filename, data] of csvFiles.entries()) {
+            const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
+            if (nameWithoutExt.toLowerCase() === lowerName || 
+                nameWithoutExt.toLowerCase() === lowerName.replace(/\.[^/.]+$/, '')) {
+                return { name: filename, data };
+            }
+        }
+        
+        return null;
+    }
+
+    // ==========================================
+    // SQL TOKENIZER (preserves original case)
     // ==========================================
     function tokenize(sql) {
         const tokens = [];
@@ -314,15 +352,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     current += char;
                 }
             } else if (char === "'" || char === '"') {
-                if (current.trim()) tokens.push({ type: 'word', value: current.trim() });
+                if (current.trim()) {
+                    // Check if current is a dotted identifier (e.g., "file.csv")
+                    tokens.push({ type: 'identifier', value: current.trim() });
+                }
                 current = '';
                 inString = true;
                 stringChar = char;
             } else if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
-                if (current.trim()) tokens.push({ type: 'word', value: current.trim() });
+                if (current.trim()) {
+                    const val = current.trim();
+                    const upper = val.toUpperCase();
+                    // Determine token type
+                    if (SQL_KEYWORDS.has(upper)) {
+                        tokens.push({ type: 'keyword', value: upper, original: val });
+                    } else if (val.includes('.') && !val.startsWith('.') && !val.endsWith('.')) {
+                        // Dotted identifier like "file.csv" or "table.column"
+                        tokens.push({ type: 'dotted', value: val });
+                    } else {
+                        tokens.push({ type: 'identifier', value: val });
+                    }
+                }
                 current = '';
             } else if (',()=<>!'.includes(char)) {
-                if (current.trim()) tokens.push({ type: 'word', value: current.trim() });
+                if (current.trim()) {
+                    const val = current.trim();
+                    const upper = val.toUpperCase();
+                    if (SQL_KEYWORDS.has(upper)) {
+                        tokens.push({ type: 'keyword', value: upper, original: val });
+                    } else if (val.includes('.')) {
+                        tokens.push({ type: 'dotted', value: val });
+                    } else {
+                        tokens.push({ type: 'identifier', value: val });
+                    }
+                }
                 current = '';
                 if (char === '<' && nextChar === '=') {
                     tokens.push({ type: 'operator', value: '<=' });
@@ -340,13 +403,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 current += char;
             }
         }
-        if (current.trim()) tokens.push({ type: 'word', value: current.trim() });
+        if (current.trim()) {
+            const val = current.trim();
+            const upper = val.toUpperCase();
+            if (SQL_KEYWORDS.has(upper)) {
+                tokens.push({ type: 'keyword', value: upper, original: val });
+            } else if (val.includes('.')) {
+                tokens.push({ type: 'dotted', value: val });
+            } else {
+                tokens.push({ type: 'identifier', value: val });
+            }
+        }
 
         return tokens;
     }
 
+    // ==========================================
+    // SQL PARSER
+    // ==========================================
     function parseSQL(sql) {
-        const tokens = tokenize(sql.toUpperCase());
+        const tokens = tokenize(sql);
         const ast = {
             select: [],
             from: [],
@@ -365,78 +441,109 @@ document.addEventListener('DOMContentLoaded', () => {
         while (i < tokens.length) {
             const token = tokens[i];
 
-            if (token.value === 'SELECT') {
-                currentClause = 'select';
-                i++;
-                if (tokens[i]?.value === 'DISTINCT') {
-                    ast.distinct = true;
+            if (token.type === 'keyword') {
+                if (token.value === 'SELECT') {
+                    currentClause = 'select';
                     i++;
+                    if (tokens[i]?.value === 'DISTINCT') {
+                        ast.distinct = true;
+                        i++;
+                    }
+                    continue;
+                } else if (token.value === 'FROM') {
+                    currentClause = 'from';
+                    i++;
+                    continue;
+                } else if (token.value === 'WHERE') {
+                    currentClause = 'where';
+                    i++;
+                    continue;
+                } else if (token.value === 'GROUP') {
+                    if (tokens[i + 1]?.value === 'BY') {
+                        currentClause = 'groupBy';
+                        i += 2;
+                        continue;
+                    }
+                } else if (token.value === 'HAVING') {
+                    currentClause = 'having';
+                    i++;
+                    continue;
+                } else if (token.value === 'ORDER') {
+                    if (tokens[i + 1]?.value === 'BY') {
+                        currentClause = 'orderBy';
+                        i += 2;
+                        continue;
+                    }
+                } else if (token.value === 'LIMIT') {
+                    currentClause = 'limit';
+                    i++;
+                    continue;
+                } else if (token.value === 'OFFSET') {
+                    currentClause = 'offset';
+                    i++;
+                    continue;
+                } else if (['JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER'].includes(token.value)) {
+                    currentClause = 'from';
+                    i++;
+                    continue;
                 }
-            } else if (token.value === 'FROM') {
-                currentClause = 'from';
-                i++;
-            } else if (token.value === 'WHERE') {
-                currentClause = 'where';
-                i++;
-            } else if (token.value === 'GROUP') {
-                if (tokens[i + 1]?.value === 'BY') {
-                    currentClause = 'groupBy';
-                    i += 2;
-                }
-            } else if (token.value === 'HAVING') {
-                currentClause = 'having';
-                i++;
-            } else if (token.value === 'ORDER') {
-                if (tokens[i + 1]?.value === 'BY') {
-                    currentClause = 'orderBy';
-                    i += 2;
-                }
-            } else if (token.value === 'LIMIT') {
-                currentClause = 'limit';
-                i++;
-            } else if (token.value === 'OFFSET') {
-                currentClause = 'offset';
-                i++;
-            } else if (token.value === 'JOIN' || token.value === 'LEFT' || token.value === 'RIGHT' || token.value === 'INNER') {
-                currentClause = 'from';
-                i++;
-            } else {
-                if (currentClause === 'select') {
+            }
+
+            // Collect tokens for current clause
+            if (currentClause === 'select') {
+                if (token.type === 'identifier' || token.type === 'dotted') {
                     ast.select.push(token.value);
-                } else if (currentClause === 'from') {
+                } else if (token.type === 'operator' && token.value === ',') {
+                    // Skip comma separator
+                } else {
+                    // Functions like COUNT(*), etc.
+                    ast.select.push(token.value || token.original || '');
+                }
+            } else if (currentClause === 'from') {
+                if (token.type === 'identifier' || token.type === 'dotted') {
                     ast.from.push(token.value);
-                } else if (currentClause === 'where') {
-                    ast.where = (ast.where || '') + ' ' + token.value;
-                } else if (currentClause === 'groupBy') {
+                }
+            } else if (currentClause === 'where') {
+                ast.where = (ast.where || '') + ' ' + (token.original || token.value);
+            } else if (currentClause === 'groupBy') {
+                if (token.type === 'identifier' || token.type === 'dotted') {
                     ast.groupBy.push(token.value);
-                } else if (currentClause === 'having') {
-                    ast.having = (ast.having || '') + ' ' + token.value;
-                } else if (currentClause === 'orderBy') {
+                }
+            } else if (currentClause === 'having') {
+                ast.having = (ast.having || '') + ' ' + (token.original || token.value);
+            } else if (currentClause === 'orderBy') {
+                if (token.type === 'identifier' || token.type === 'dotted') {
                     ast.orderBy.push(token.value);
-                } else if (currentClause === 'limit') {
+                } else if (token.type === 'keyword' && ['ASC', 'DESC'].includes(token.value)) {
+                    ast.orderBy.push(token.value);
+                }
+            } else if (currentClause === 'limit') {
+                if (token.type === 'identifier') {
                     ast.limit = parseInt(token.value);
-                } else if (currentClause === 'offset') {
+                }
+            } else if (currentClause === 'offset') {
+                if (token.type === 'identifier') {
                     ast.offset = parseInt(token.value);
                 }
-                i++;
             }
+            i++;
         }
 
         return ast;
     }
 
     // ==========================================
-    // QUERY EXECUTOR (Simplified)
+    // QUERY EXECUTOR
     // ==========================================
     function executeQuery(ast) {
         if (ast.from.length === 0) throw new Error('FROM clause is required');
 
-        const tableName = ast.from[0];
-        if (!csvFiles.has(tableName)) {
-            throw new Error(`Table "${tableName}" not found. Available tables: ${Array.from(csvFiles.keys()).join(', ')}`);
+        const tableLookup = findTable(ast.from[0]);
+        if (!tableLookup) {
+            throw new Error(`Table "${ast.from[0]}" not found. Available tables: ${Array.from(csvFiles.keys()).join(', ')}`);
         }
 
-        const data = csvFiles.get(tableName);
+        const data = tableLookup.data;
         let rows = data.rows.map(row => {
             const obj = {};
             data.headers.forEach((h, i) => {
@@ -508,11 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rows = rows.map(row => {
                 const result = {};
                 ast.select.forEach(sel => {
-                    if (sel.includes('(')) {
-                        result[sel] = row[sel];
-                    } else {
-                        result[sel] = row[sel];
-                    }
+                    result[sel] = row[sel];
                 });
                 return result;
             });
@@ -772,7 +875,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     reorderApplyBtn.addEventListener('click', () => {
         const newOrder = Array.from(reorderList.querySelectorAll('.csv-reorder-item')).map(item => item.dataset.column);
-        const sql = `SELECT ${newOrder.join(', ')} FROM ${csvFiles.keys().next().value}`;
+        const firstTableName = csvFiles.keys().next().value;
+        const sql = `SELECT ${newOrder.join(', ')} FROM "${firstTableName}"`;
         sqlInput.value = sql;
         runBtn.click();
     });
