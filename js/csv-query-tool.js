@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const reorderPreviewBtn = document.getElementById('csv-reorder-preview-btn');
     const errorEl = document.getElementById('csv-error');
 
-    // Modal elements
     const modal = document.getElementById('csv-modal');
     const modalOverlay = modal.querySelector('.csv-modal-overlay');
     const modalTitle = document.getElementById('csv-modal-title');
@@ -48,9 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // STATE
     // ==========================================
-    const csvFiles = new Map();
+    const csvFiles = new Map(); // Map<tableName, {filename, headers, rows, delimiter, hasHeader}>
     let lastQueryResult = null;
-    let modalData = null; // Data currently shown in modal (for download/copy)
+    let modalData = null;
     const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
     // ==========================================
@@ -173,15 +172,34 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onload = (e) => {
                 try {
                     const data = parseCSV(e.target.result, delimiter, hasHeader);
-                    csvFiles.set(file.name, {
+                    
+                    // Table name = filename without extension
+                    let tableName = file.name.replace(/\.[^/.]+$/, '');
+                    
+                    // Handle duplicate table names
+                    let finalTableName = tableName;
+                    let counter = 2;
+                    while (csvFiles.has(finalTableName)) {
+                        finalTableName = `${tableName}_${counter}`;
+                        counter++;
+                    }
+                    
+                    csvFiles.set(finalTableName, {
+                        filename: file.name,
                         ...data,
                         delimiter: delimiter,
                         hasHeader: hasHeader
                     });
+                    
                     updateFileList();
                     updatePreviewSelect();
                     updateColumnTools();
+                    updateExamples();
                     hideError();
+                    
+                    if (finalTableName !== tableName) {
+                        console.warn(`Table name conflict: "${tableName}" already exists. Using "${finalTableName}" instead.`);
+                    }
                 } catch (error) {
                     showError(`Error parsing "${file.name}": ${error.message}`);
                 }
@@ -192,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateFileList() {
         fileList.innerHTML = '';
-        csvFiles.forEach((data, filename) => {
+        csvFiles.forEach((data, tableName) => {
             const item = document.createElement('div');
             item.className = 'csv-file-item';
             
@@ -206,21 +224,22 @@ document.addEventListener('DOMContentLoaded', () => {
             
             item.innerHTML = `
                 <div class="csv-file-info">
-                    <span class="csv-file-name">✓ ${filename}</span>
+                    <span class="csv-file-name">✓ <strong>${tableName}</strong> <span style="color: var(--text-secondary); font-weight: normal;">(${data.filename})</span></span>
                     <span class="csv-file-stats">(${data.rows.length} rows, ${data.headers.length} columns)</span>
                     <span class="csv-file-settings">${delimiterDisplay} | ${headerDisplay}</span>
                 </div>
-                <button class="csv-file-remove" data-filename="${filename}">Remove</button>
+                <button class="csv-file-remove" data-tablename="${tableName}">Remove</button>
             `;
             fileList.appendChild(item);
         });
 
         fileList.querySelectorAll('.csv-file-remove').forEach(btn => {
             btn.addEventListener('click', () => {
-                csvFiles.delete(btn.dataset.filename);
+                csvFiles.delete(btn.dataset.tablename);
                 updateFileList();
                 updatePreviewSelect();
                 updateColumnTools();
+                updateExamples();
             });
         });
 
@@ -235,23 +254,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updatePreviewSelect() {
         previewSelect.innerHTML = '<option value="">Select a file to preview</option>';
-        csvFiles.forEach((data, filename) => {
+        csvFiles.forEach((data, tableName) => {
             const option = document.createElement('option');
-            option.value = filename;
-            option.textContent = filename;
+            option.value = tableName;
+            option.textContent = `${tableName} (${data.filename})`;
             previewSelect.appendChild(option);
         });
     }
 
     previewSelect.addEventListener('change', () => {
-        const filename = previewSelect.value;
-        if (!filename) {
+        const tableName = previewSelect.value;
+        if (!tableName) {
             previewTable.innerHTML = '';
             return;
         }
-        const data = csvFiles.get(filename);
+        const data = csvFiles.get(tableName);
         renderTable(data.headers, data.rows.slice(0, 100), previewTable, true);
+        updateExamples();
     });
+
+    // ==========================================
+    // DYNAMIC EXAMPLES
+    // ==========================================
+    function updateExamples() {
+        examplesDropdown.innerHTML = '';
+        
+        const tableName = previewSelect.value;
+        if (!tableName) {
+            examplesDropdown.innerHTML = '<div class="csv-example-item">Select a file to see examples</div>';
+            return;
+        }
+        
+        const data = csvFiles.get(tableName);
+        if (!data || data.headers.length === 0) return;
+        
+        const cols = data.headers;
+        const firstCol = cols[0];
+        const secondCol = cols.length > 1 ? cols[1] : cols[0];
+        const thirdCol = cols.length > 2 ? cols[2] : cols[0];
+        
+        const examples = [
+            { label: 'Select all (first 10 rows)', query: `SELECT * FROM ${tableName} LIMIT 10` },
+            { label: `Select specific columns`, query: `SELECT ${firstCol}, ${secondCol} FROM ${tableName}` },
+            { label: `Filter with WHERE`, query: `SELECT * FROM ${tableName} WHERE ${secondCol} IS NOT NULL LIMIT 10` },
+            { label: `Group by with COUNT`, query: `SELECT ${firstCol}, COUNT(*) as total FROM ${tableName} GROUP BY ${firstCol} ORDER BY total DESC` },
+            { label: `Distinct values`, query: `SELECT DISTINCT ${firstCol} FROM ${tableName} ORDER BY ${firstCol}` },
+        ];
+        
+        // Add JOIN example if multiple files
+        if (csvFiles.size > 1 && cols.length > 0) {
+            const otherTable = Array.from(csvFiles.keys()).find(t => t !== tableName);
+            if (otherTable) {
+                const otherData = csvFiles.get(otherTable);
+                const otherFirstCol = otherData.headers[0];
+                examples.push({
+                    label: `JOIN with ${otherTable}`,
+                    query: `SELECT ${tableName}.${firstCol}, ${otherTable}.${otherFirstCol} FROM ${tableName} JOIN ${otherTable} ON ${tableName}.${firstCol} = ${otherTable}.${otherFirstCol} LIMIT 10`
+                });
+            }
+        }
+        
+        examples.forEach(ex => {
+            const item = document.createElement('div');
+            item.className = 'csv-example-item';
+            item.textContent = ex.label;
+            item.dataset.query = ex.query;
+            item.addEventListener('click', () => {
+                sqlInput.value = ex.query;
+                examplesDropdown.style.display = 'none';
+            });
+            examplesDropdown.appendChild(item);
+        });
+    }
 
     // ==========================================
     // TABLE RENDERING
@@ -307,10 +381,8 @@ document.addEventListener('DOMContentLoaded', () => {
         modalInfo.textContent = infoText || '';
         modalInfo.style.display = infoText ? '' : 'none';
         
-        // Render table in modal
         renderTable(headers, rows, modalBody, rows.length > 100);
         
-        // Store data for download/copy
         modalData = { headers, rows };
         
         modal.style.display = 'flex';
@@ -388,32 +460,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'OUTER', 'ON', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'CASE', 'WHEN',
         'THEN', 'ELSE', 'END', 'TRUE', 'FALSE'
     ]);
-
-    // ==========================================
-    // CASE-INSENSITIVE TABLE LOOKUP
-    // ==========================================
-    function findTable(name) {
-        if (csvFiles.has(name)) {
-            return { name, data: csvFiles.get(name) };
-        }
-        
-        const lowerName = name.toLowerCase();
-        for (const [filename, data] of csvFiles.entries()) {
-            if (filename.toLowerCase() === lowerName) {
-                return { name: filename, data };
-            }
-        }
-        
-        for (const [filename, data] of csvFiles.entries()) {
-            const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
-            if (nameWithoutExt.toLowerCase() === lowerName || 
-                nameWithoutExt.toLowerCase() === lowerName.replace(/\.[^/.]+$/, '')) {
-                return { name: filename, data };
-            }
-        }
-        
-        return null;
-    }
 
     // ==========================================
     // SQL TOKENIZER
@@ -504,13 +550,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // SQL PARSER
+    // SQL PARSER (with JOIN support)
     // ==========================================
     function parseSQL(sql) {
         const tokens = tokenize(sql);
         const ast = {
             select: [],
-            from: [],
+            from: [], // Array of {table, alias}
+            joins: [], // Array of {type, table, alias, on}
             where: null,
             groupBy: [],
             having: null,
@@ -568,8 +615,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     i++;
                     continue;
                 } else if (['JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER'].includes(token.value)) {
-                    currentClause = 'from';
-                    i++;
+                    let joinType = 'INNER';
+                    if (token.value === 'LEFT') joinType = 'LEFT';
+                    else if (token.value === 'RIGHT') joinType = 'RIGHT';
+                    
+                    if (token.value === 'LEFT' || token.value === 'RIGHT' || token.value === 'INNER' || token.value === 'OUTER') {
+                        i++;
+                        if (tokens[i]?.value === 'JOIN') {
+                            i++;
+                        }
+                    } else {
+                        i++;
+                    }
+                    
+                    // Parse table name and optional alias
+                    if (tokens[i] && (tokens[i].type === 'identifier' || tokens[i].type === 'dotted')) {
+                        const table = tokens[i].value;
+                        i++;
+                        let alias = null;
+                        if (tokens[i] && tokens[i].type === 'identifier' && tokens[i].value.toUpperCase() !== 'ON') {
+                            alias = tokens[i].value;
+                            i++;
+                        }
+                        
+                        // Parse ON condition
+                        let onCondition = null;
+                        if (tokens[i]?.value === 'ON') {
+                            i++;
+                            onCondition = '';
+                            while (i < tokens.length && !['WHERE', 'GROUP', 'HAVING', 'ORDER', 'LIMIT', 'OFFSET', 'JOIN', 'LEFT', 'RIGHT', 'INNER'].includes(tokens[i]?.value)) {
+                                onCondition += ' ' + (tokens[i].original || tokens[i].value);
+                                i++;
+                            }
+                            onCondition = onCondition.trim();
+                        }
+                        
+                        ast.joins.push({ type: joinType, table, alias, on: onCondition });
+                    }
                     continue;
                 }
             }
@@ -584,7 +666,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else if (currentClause === 'from') {
                 if (token.type === 'identifier' || token.type === 'dotted') {
-                    ast.from.push(token.value);
+                    const table = token.value;
+                    i++;
+                    let alias = null;
+                    if (tokens[i] && tokens[i].type === 'identifier' && !['WHERE', 'GROUP', 'HAVING', 'ORDER', 'LIMIT', 'OFFSET', 'JOIN', 'LEFT', 'RIGHT', 'INNER'].includes(tokens[i]?.value)) {
+                        alias = tokens[i].value;
+                        i++;
+                    }
+                    ast.from.push({ table, alias });
+                    continue;
                 }
             } else if (currentClause === 'where') {
                 ast.where = (ast.where || '') + ' ' + (token.original || token.value);
@@ -616,47 +706,108 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // QUERY EXECUTOR
+    // QUERY EXECUTOR (with JOIN)
     // ==========================================
     function executeQuery(ast) {
         if (ast.from.length === 0) throw new Error('FROM clause is required');
 
-        const tableLookup = findTable(ast.from[0]);
-        if (!tableLookup) {
-            throw new Error(`Table "${ast.from[0]}" not found. Available tables: ${Array.from(csvFiles.keys()).join(', ')}`);
+        // Build table alias map
+        const tableAliases = {}; // alias -> tableName
+        const mainTable = ast.from[0];
+        const mainData = findTable(mainTable.table);
+        if (!mainData) {
+            throw new Error(`Table "${mainTable.table}" not found. Available tables: ${Array.from(csvFiles.keys()).join(', ')}`);
         }
-
-        const data = tableLookup.data;
-        let rows = data.rows.map(row => {
+        
+        const mainAlias = mainTable.alias || mainData.name;
+        tableAliases[mainAlias] = mainData.name;
+        
+        let rows = mainData.data.rows.map(row => {
             const obj = {};
-            data.headers.forEach((h, i) => {
-                obj[h] = row[i];
+            mainData.data.headers.forEach((h, i) => {
+                obj[`${mainAlias}.${h}`] = row[i];
+                obj[h] = row[i]; // Also add without prefix for convenience
             });
             return obj;
         });
 
+        // Process JOINs
+        ast.joins.forEach(join => {
+            const joinData = findTable(join.table);
+            if (!joinData) {
+                throw new Error(`Table "${join.table}" not found`);
+            }
+            
+            const joinAlias = join.alias || joinData.name;
+            tableAliases[joinAlias] = joinData.name;
+            
+            const joinRows = joinData.data.rows.map(row => {
+                const obj = {};
+                joinData.data.headers.forEach((h, i) => {
+                    obj[`${joinAlias}.${h}`] = row[i];
+                    obj[h] = row[i];
+                });
+                return obj;
+            });
+            
+            // Cartesian product
+            const newRows = [];
+            rows.forEach(leftRow => {
+                joinRows.forEach(rightRow => {
+                    const combined = { ...leftRow, ...rightRow };
+                    
+                    // Apply ON condition
+                    if (join.on) {
+                        if (evaluateJoinCondition(combined, join.on, tableAliases)) {
+                            newRows.push(combined);
+                        } else if (join.type === 'LEFT') {
+                            // For LEFT JOIN, include left row with NULLs for right
+                            const nullRow = { ...leftRow };
+                            joinData.data.headers.forEach(h => {
+                                nullRow[`${joinAlias}.${h}`] = null;
+                                nullRow[h] = null;
+                            });
+                            newRows.push(nullRow);
+                        }
+                    } else {
+                        newRows.push(combined);
+                    }
+                });
+            });
+            
+            rows = newRows;
+        });
+
+        // WHERE
         if (ast.where) {
-            rows = rows.filter(row => evaluateWhere(row, ast.where.trim()));
+            rows = rows.filter(row => evaluateWhere(row, ast.where.trim(), tableAliases));
         }
 
+        // GROUP BY
         if (ast.groupBy.length > 0) {
             const groups = new Map();
             rows.forEach(row => {
-                const key = ast.groupBy.map(col => row[col]).join('|');
+                const key = ast.groupBy.map(col => resolveColumn(col, row, tableAliases)).join('|');
                 if (!groups.has(key)) groups.set(key, []);
                 groups.get(key).push(row);
             });
 
             rows = Array.from(groups.values()).map(group => {
                 const result = {};
-                ast.groupBy.forEach(col => result[col] = group[0][col]);
+                ast.groupBy.forEach(col => {
+                    const resolved = resolveColumn(col, group[0], tableAliases);
+                    result[col] = resolved;
+                });
                 
                 ast.select.forEach(sel => {
-                    const match = sel.match(/(COUNT|SUM|AVG|MIN|MAX)\((\*|\w+)\)/i);
+                    const match = sel.match(/(COUNT|SUM|AVG|MIN|MAX)\((\*|[\w.]+)\)/i);
                     if (match) {
                         const func = match[1].toUpperCase();
                         const col = match[2];
-                        const values = group.map(r => col === '*' ? 1 : r[col]).filter(v => v !== null);
+                        const values = group.map(r => {
+                            if (col === '*') return 1;
+                            return resolveColumn(col, r, tableAliases);
+                        }).filter(v => v !== null);
                         
                         if (func === 'COUNT') result[sel] = group.length;
                         else if (func === 'SUM') result[sel] = values.reduce((a, b) => a + (Number(b) || 0), 0);
@@ -670,34 +821,45 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // HAVING
         if (ast.having) {
-            rows = rows.filter(row => evaluateWhere(row, ast.having.trim()));
+            rows = rows.filter(row => evaluateWhere(row, ast.having.trim(), tableAliases));
         }
 
+        // ORDER BY
         if (ast.orderBy.length > 0) {
             const col = ast.orderBy[0];
             const desc = ast.orderBy[1]?.toUpperCase() === 'DESC';
             rows.sort((a, b) => {
-                const va = a[col], vb = b[col];
+                const va = resolveColumn(col, a, tableAliases);
+                const vb = resolveColumn(col, b, tableAliases);
                 if (va < vb) return desc ? 1 : -1;
                 if (va > vb) return desc ? -1 : 1;
                 return 0;
             });
         }
 
+        // LIMIT/OFFSET
         if (ast.offset) rows = rows.slice(ast.offset);
         if (ast.limit) rows = rows.slice(0, ast.limit);
 
+        // SELECT columns
         if (ast.select[0] !== '*') {
             rows = rows.map(row => {
                 const result = {};
                 ast.select.forEach(sel => {
-                    result[sel] = row[sel];
+                    if (sel.includes('(')) {
+                        result[sel] = row[sel];
+                    } else {
+                        const resolved = resolveColumn(sel, row, tableAliases);
+                        result[sel] = resolved;
+                    }
                 });
                 return result;
             });
         }
 
+        // DISTINCT
         if (ast.distinct) {
             const seen = new Set();
             rows = rows.filter(row => {
@@ -711,11 +873,60 @@ document.addEventListener('DOMContentLoaded', () => {
         return rows;
     }
 
-    function evaluateWhere(row, condition) {
-        const match = condition.match(/^(\w+)\s*(=|!=|<|>|<=|>=|LIKE)\s*'?([^']*)'?$/i);
+    function resolveColumn(col, row, tableAliases) {
+        // If column has table prefix (e.g., "users.name")
+        if (col.includes('.')) {
+            return row[col];
+        }
+        // Otherwise, try to find it in the row
+        return row[col];
+    }
+
+    function evaluateJoinCondition(row, condition, tableAliases) {
+        // Simple condition: alias1.col1 = alias2.col2
+        const match = condition.match(/^([\w.]+)\s*=\s*([\w.]+)$/);
+        if (match) {
+            const [, left, right] = match;
+            return row[left] === row[right];
+        }
+        return true;
+    }
+
+    function evaluateWhere(row, condition, tableAliases) {
+        // Handle AND/OR
+        if (/\bAND\b/i.test(condition)) {
+            const parts = condition.split(/\s+AND\s+/i);
+            return parts.every(part => evaluateWhere(row, part.trim(), tableAliases));
+        }
+        if (/\bOR\b/i.test(condition)) {
+            const parts = condition.split(/\s+OR\s+/i);
+            return parts.some(part => evaluateWhere(row, part.trim(), tableAliases));
+        }
+
+        // Handle IN
+        const inMatch = condition.match(/^([\w.]+)\s+IN\s*\(([^)]+)\)$/i);
+        if (inMatch) {
+            const [, col, values] = inMatch;
+            const valueList = values.split(',').map(v => v.trim().replace(/^['"]|['"]$/g, ''));
+            const rowVal = resolveColumn(col, row, tableAliases);
+            return valueList.includes(String(rowVal));
+        }
+
+        // Handle BETWEEN
+        const betweenMatch = condition.match(/^([\w.]+)\s+BETWEEN\s+(\S+)\s+AND\s+(\S+)$/i);
+        if (betweenMatch) {
+            const [, col, val1, val2] = betweenMatch;
+            const rowVal = Number(resolveColumn(col, row, tableAliases));
+            const num1 = Number(val1.replace(/^['"]|['"]$/g, ''));
+            const num2 = Number(val2.replace(/^['"]|['"]$/g, ''));
+            return rowVal >= num1 && rowVal <= num2;
+        }
+
+        // Handle basic operators
+        const match = condition.match(/^([\w.]+)\s*(=|!=|<|>|<=|>=|LIKE)\s*'?([^']*)'?$/i);
         if (match) {
             const [, col, op, val] = match;
-            const rowVal = row[col];
+            const rowVal = resolveColumn(col, row, tableAliases);
             const compareVal = isNaN(val) ? val : Number(val);
 
             switch (op.toUpperCase()) {
@@ -731,15 +942,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (/IS NULL$/i.test(condition)) {
             const col = condition.split(/\s+/)[0];
-            return row[col] === null || row[col] === undefined;
+            return resolveColumn(col, row, tableAliases) === null || resolveColumn(col, row, tableAliases) === undefined;
         }
 
         if (/IS NOT NULL$/i.test(condition)) {
             const col = condition.split(/\s+/)[0];
-            return row[col] !== null && row[col] !== undefined;
+            return resolveColumn(col, row, tableAliases) !== null && resolveColumn(col, row, tableAliases) !== undefined;
         }
 
         return true;
+    }
+
+    function findTable(name) {
+        // Exact match
+        if (csvFiles.has(name)) {
+            return { name, data: csvFiles.get(name) };
+        }
+        
+        // Case-insensitive match
+        const lowerName = name.toLowerCase();
+        for (const [tableName, data] of csvFiles.entries()) {
+            if (tableName.toLowerCase() === lowerName) {
+                return { name: tableName, data };
+            }
+        }
+        
+        return null;
     }
 
     // ==========================================
@@ -789,13 +1017,6 @@ document.addEventListener('DOMContentLoaded', () => {
         examplesDropdown.style.display = examplesDropdown.style.display === 'none' ? '' : 'none';
     });
 
-    examplesDropdown.querySelectorAll('.csv-example-item').forEach(item => {
-        item.addEventListener('click', () => {
-            sqlInput.value = item.dataset.query;
-            examplesDropdown.style.display = 'none';
-        });
-    });
-
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.csv-query-controls')) {
             examplesDropdown.style.display = 'none';
@@ -803,7 +1024,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // EXPORT FUNCTIONS (for query results)
+    // EXPORT FUNCTIONS
     // ==========================================
     exportCsvBtn.addEventListener('click', () => {
         if (!lastQueryResult || lastQueryResult.length === 0) return;
@@ -852,10 +1073,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateColumnTools() {
         if (csvFiles.size === 0) return;
 
-        const firstFile = csvFiles.values().next().value;
-        const headers = firstFile.headers;
+        const firstTable = csvFiles.values().next().value;
+        const headers = firstTable.headers;
 
-        // Extract column select
         extractColumnSelect.innerHTML = '<option value="">Select column</option>';
         headers.forEach(h => {
             const option = document.createElement('option');
@@ -864,7 +1084,6 @@ document.addEventListener('DOMContentLoaded', () => {
             extractColumnSelect.appendChild(option);
         });
 
-        // Reorder list
         reorderList.innerHTML = '';
         headers.forEach(h => {
             const item = document.createElement('div');
@@ -906,12 +1125,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Extract mode toggle
     extractModeRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             const isStringMode = radio.value === 'string' && radio.checked;
             extractSeparatorSection.style.display = isStringMode ? '' : 'none';
-            // Hide string output when switching to column mode
             if (!isStringMode) {
                 extractStringOutput.style.display = 'none';
             }
@@ -922,7 +1139,6 @@ document.addEventListener('DOMContentLoaded', () => {
         extractSeparatorCustom.style.display = extractSeparator.value === 'custom' ? '' : 'none';
     });
 
-    // Extract button handler
     extractBtn.addEventListener('click', () => {
         const column = extractColumnSelect.value;
         if (!column) {
@@ -930,18 +1146,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const firstFile = csvFiles.values().next().value;
-        const colIndex = firstFile.headers.indexOf(column);
-        const values = firstFile.rows.map(row => row[colIndex]);
+        const firstTable = csvFiles.values().next().value;
+        const colIndex = firstTable.headers.indexOf(column);
+        const values = firstTable.rows.map(row => row[colIndex]);
 
         const mode = document.querySelector('input[name="csv-extract-mode"]:checked').value;
 
         if (mode === 'column') {
-            // Open modal with preview
             const infoText = `${values.length} values extracted from column "${column}"`;
             openModal(`Column: ${column}`, [column], values.map(v => [v]), infoText);
         } else {
-            // String mode: show inline textarea
             let separator = extractSeparator.value;
             if (separator === 'custom') {
                 separator = extractSeparatorCustom.value;
@@ -958,7 +1172,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             extractStringOutput.style.display = '';
 
-            // Attach copy listener
             const copyStringBtn = extractStringOutput.querySelector('.csv-copy-string-btn');
             copyStringBtn.addEventListener('click', async () => {
                 try {
@@ -977,7 +1190,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Reorder preview button handler
     reorderPreviewBtn.addEventListener('click', () => {
         if (csvFiles.size === 0) {
             showError('No CSV file loaded');
@@ -986,12 +1198,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const newOrder = Array.from(reorderList.querySelectorAll('.csv-reorder-item')).map(item => item.dataset.column);
         const firstTableName = csvFiles.keys().next().value;
-        const sql = `SELECT ${newOrder.join(', ')} FROM "${firstTableName}"`;
+        const sql = `SELECT ${newOrder.join(', ')} FROM ${firstTableName}`;
         
-        // Update SQL input
         sqlInput.value = sql;
         
-        // Execute query
         try {
             const ast = parseSQL(sql);
             const results = executeQuery(ast);
@@ -1006,10 +1216,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const rows = results.map(r => headers.map(h => r[h]));
             const infoText = `${results.length} rows with columns in new order: ${newOrder.join(', ')}`;
             
-            // Show in modal
             openModal('Reordered Data', headers, rows, infoText);
             
-            // Also update main results section
             resultsInfo.textContent = `Query returned ${results.length} row${results.length !== 1 ? 's' : ''}`;
             renderTable(headers, rows, resultsTable);
             resultsSection.style.display = '';
