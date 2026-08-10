@@ -29,16 +29,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const extractSeparator = document.getElementById('csv-extract-separator');
     const extractSeparatorCustom = document.getElementById('csv-extract-separator-custom');
     const extractBtn = document.getElementById('csv-extract-btn');
-    const extractOutput = document.getElementById('csv-extract-output');
+    const extractStringOutput = document.getElementById('csv-extract-string-output');
     const reorderList = document.getElementById('csv-reorder-list');
-    const reorderApplyBtn = document.getElementById('csv-reorder-apply-btn');
+    const reorderPreviewBtn = document.getElementById('csv-reorder-preview-btn');
     const errorEl = document.getElementById('csv-error');
+
+    // Modal elements
+    const modal = document.getElementById('csv-modal');
+    const modalOverlay = modal.querySelector('.csv-modal-overlay');
+    const modalTitle = document.getElementById('csv-modal-title');
+    const modalInfo = document.getElementById('csv-modal-info');
+    const modalBody = document.getElementById('csv-modal-body');
+    const modalCloseBtn = document.getElementById('csv-modal-close');
+    const modalCloseFooterBtn = document.getElementById('csv-modal-close-footer');
+    const modalDownloadCsvBtn = document.getElementById('csv-modal-download-csv');
+    const modalCopyBtn = document.getElementById('csv-modal-copy');
 
     // ==========================================
     // STATE
     // ==========================================
     const csvFiles = new Map();
     let lastQueryResult = null;
+    let modalData = null; // Data currently shown in modal (for download/copy)
     const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
     // ==========================================
@@ -288,7 +300,86 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // SQL KEYWORDS (for case-insensitive matching)
+    // MODAL FUNCTIONS
+    // ==========================================
+    function openModal(title, headers, rows, infoText) {
+        modalTitle.textContent = title;
+        modalInfo.textContent = infoText || '';
+        modalInfo.style.display = infoText ? '' : 'none';
+        
+        // Render table in modal
+        renderTable(headers, rows, modalBody, rows.length > 100);
+        
+        // Store data for download/copy
+        modalData = { headers, rows };
+        
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        modalData = null;
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal);
+    modalCloseFooterBtn.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+            closeModal();
+        }
+    });
+
+    modalDownloadCsvBtn.addEventListener('click', () => {
+        if (!modalData) return;
+        const csv = rowsToCsv(modalData.headers, modalData.rows);
+        const filename = modalTitle.textContent.toLowerCase().replace(/\s+/g, '-') + '.csv';
+        downloadFile(csv, filename, 'text/csv');
+    });
+
+    modalCopyBtn.addEventListener('click', async () => {
+        if (!modalData) return;
+        const csv = rowsToCsv(modalData.headers, modalData.rows);
+        try {
+            await navigator.clipboard.writeText(csv);
+            const originalText = modalCopyBtn.textContent;
+            modalCopyBtn.textContent = 'Copied!';
+            modalCopyBtn.disabled = true;
+            setTimeout(() => {
+                modalCopyBtn.textContent = originalText;
+                modalCopyBtn.disabled = false;
+            }, 2000);
+        } catch (error) {
+            console.error('Failed to copy:', error);
+        }
+    });
+
+    function rowsToCsv(headers, rows) {
+        const escapeCsv = (val) => {
+            if (val === null || val === undefined) return '';
+            const str = String(val).replace(/"/g, '""');
+            return `"${str}"`;
+        };
+        
+        const lines = [headers.map(escapeCsv).join(',')];
+        rows.forEach(row => {
+            lines.push(headers.map((_, i) => escapeCsv(row[i])).join(','));
+        });
+        return lines.join('\n');
+    }
+
+    function objectsToCsv(objects) {
+        if (!objects || objects.length === 0) return '';
+        const headers = Object.keys(objects[0]);
+        const rows = objects.map(obj => headers.map(h => obj[h]));
+        return rowsToCsv(headers, rows);
+    }
+
+    // ==========================================
+    // SQL KEYWORDS
     // ==========================================
     const SQL_KEYWORDS = new Set([
         'SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'NOT', 'IN', 'LIKE', 'BETWEEN',
@@ -302,12 +393,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // CASE-INSENSITIVE TABLE LOOKUP
     // ==========================================
     function findTable(name) {
-        // Exact match first
         if (csvFiles.has(name)) {
             return { name, data: csvFiles.get(name) };
         }
         
-        // Case-insensitive match
         const lowerName = name.toLowerCase();
         for (const [filename, data] of csvFiles.entries()) {
             if (filename.toLowerCase() === lowerName) {
@@ -315,7 +404,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Try without extension (e.g., "file" matches "file.csv")
         for (const [filename, data] of csvFiles.entries()) {
             const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
             if (nameWithoutExt.toLowerCase() === lowerName || 
@@ -328,7 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // SQL TOKENIZER (preserves original case)
+    // SQL TOKENIZER
     // ==========================================
     function tokenize(sql) {
         const tokens = [];
@@ -353,7 +441,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else if (char === "'" || char === '"') {
                 if (current.trim()) {
-                    // Check if current is a dotted identifier (e.g., "file.csv")
                     tokens.push({ type: 'identifier', value: current.trim() });
                 }
                 current = '';
@@ -363,11 +450,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (current.trim()) {
                     const val = current.trim();
                     const upper = val.toUpperCase();
-                    // Determine token type
                     if (SQL_KEYWORDS.has(upper)) {
                         tokens.push({ type: 'keyword', value: upper, original: val });
                     } else if (val.includes('.') && !val.startsWith('.') && !val.endsWith('.')) {
-                        // Dotted identifier like "file.csv" or "table.column"
                         tokens.push({ type: 'dotted', value: val });
                     } else {
                         tokens.push({ type: 'identifier', value: val });
@@ -489,14 +574,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Collect tokens for current clause
             if (currentClause === 'select') {
                 if (token.type === 'identifier' || token.type === 'dotted') {
                     ast.select.push(token.value);
                 } else if (token.type === 'operator' && token.value === ',') {
-                    // Skip comma separator
+                    // skip
                 } else {
-                    // Functions like COUNT(*), etc.
                     ast.select.push(token.value || token.original || '');
                 }
             } else if (currentClause === 'from') {
@@ -552,12 +635,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return obj;
         });
 
-        // WHERE
         if (ast.where) {
             rows = rows.filter(row => evaluateWhere(row, ast.where.trim()));
         }
 
-        // GROUP BY
         if (ast.groupBy.length > 0) {
             const groups = new Map();
             rows.forEach(row => {
@@ -589,12 +670,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // HAVING
         if (ast.having) {
             rows = rows.filter(row => evaluateWhere(row, ast.having.trim()));
         }
 
-        // ORDER BY
         if (ast.orderBy.length > 0) {
             const col = ast.orderBy[0];
             const desc = ast.orderBy[1]?.toUpperCase() === 'DESC';
@@ -606,11 +685,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // LIMIT/OFFSET
         if (ast.offset) rows = rows.slice(ast.offset);
         if (ast.limit) rows = rows.slice(0, ast.limit);
 
-        // SELECT columns
         if (ast.select[0] !== '*') {
             rows = rows.map(row => {
                 const result = {};
@@ -621,7 +698,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // DISTINCT
         if (ast.distinct) {
             const seen = new Set();
             rows = rows.filter(row => {
@@ -692,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 const headers = Object.keys(results[0]);
                 resultsInfo.textContent = `Query returned ${results.length} row${results.length !== 1 ? 's' : ''}`;
-                renderTable(headers, results, resultsTable);
+                renderTable(headers, results.map(r => headers.map(h => r[h])), resultsTable);
             }
 
             resultsSection.style.display = '';
@@ -727,15 +803,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // EXPORT FUNCTIONS
+    // EXPORT FUNCTIONS (for query results)
     // ==========================================
     exportCsvBtn.addEventListener('click', () => {
         if (!lastQueryResult || lastQueryResult.length === 0) return;
-        const headers = Object.keys(lastQueryResult[0]);
-        const csv = [
-            headers.join(','),
-            ...lastQueryResult.map(row => headers.map(h => `"${row[h] ?? ''}"`).join(','))
-        ].join('\n');
+        const csv = objectsToCsv(lastQueryResult);
         downloadFile(csv, 'query-results.csv', 'text/csv');
     });
 
@@ -783,6 +855,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const firstFile = csvFiles.values().next().value;
         const headers = firstFile.headers;
 
+        // Extract column select
         extractColumnSelect.innerHTML = '<option value="">Select column</option>';
         headers.forEach(h => {
             const option = document.createElement('option');
@@ -791,6 +864,7 @@ document.addEventListener('DOMContentLoaded', () => {
             extractColumnSelect.appendChild(option);
         });
 
+        // Reorder list
         reorderList.innerHTML = '';
         headers.forEach(h => {
             const item = document.createElement('div');
@@ -832,9 +906,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Extract mode toggle
     extractModeRadios.forEach(radio => {
         radio.addEventListener('change', () => {
-            extractSeparatorSection.style.display = radio.value === 'string' && radio.checked ? '' : 'none';
+            const isStringMode = radio.value === 'string' && radio.checked;
+            extractSeparatorSection.style.display = isStringMode ? '' : 'none';
+            // Hide string output when switching to column mode
+            if (!isStringMode) {
+                extractStringOutput.style.display = 'none';
+            }
         });
     });
 
@@ -842,6 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
         extractSeparatorCustom.style.display = extractSeparator.value === 'custom' ? '' : 'none';
     });
 
+    // Extract button handler
     extractBtn.addEventListener('click', () => {
         const column = extractColumnSelect.value;
         if (!column) {
@@ -856,10 +937,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const mode = document.querySelector('input[name="csv-extract-mode"]:checked').value;
 
         if (mode === 'column') {
-            const result = values.map(v => [v]);
-            renderTable([column], result, extractOutput);
-            extractOutput.style.display = '';
+            // Open modal with preview
+            const infoText = `${values.length} values extracted from column "${column}"`;
+            openModal(`Column: ${column}`, [column], values.map(v => [v]), infoText);
         } else {
+            // String mode: show inline textarea
             let separator = extractSeparator.value;
             if (separator === 'custom') {
                 separator = extractSeparatorCustom.value;
@@ -868,17 +950,73 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const result = values.join(separator);
-            extractOutput.innerHTML = `<textarea class="csv-extract-textarea" readonly>${result}</textarea>`;
-            extractOutput.style.display = '';
+            extractStringOutput.innerHTML = `
+                <textarea class="csv-extract-textarea" readonly>${result}</textarea>
+                <div class="csv-export-controls" style="margin-top: 0.75rem;">
+                    <button class="btn btn-secondary csv-copy-string-btn">Copy</button>
+                </div>
+            `;
+            extractStringOutput.style.display = '';
+
+            // Attach copy listener
+            const copyStringBtn = extractStringOutput.querySelector('.csv-copy-string-btn');
+            copyStringBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(result);
+                    const originalText = copyStringBtn.textContent;
+                    copyStringBtn.textContent = 'Copied!';
+                    copyStringBtn.disabled = true;
+                    setTimeout(() => {
+                        copyStringBtn.textContent = originalText;
+                        copyStringBtn.disabled = false;
+                    }, 2000);
+                } catch (error) {
+                    console.error('Failed to copy:', error);
+                }
+            });
         }
     });
 
-    reorderApplyBtn.addEventListener('click', () => {
+    // Reorder preview button handler
+    reorderPreviewBtn.addEventListener('click', () => {
+        if (csvFiles.size === 0) {
+            showError('No CSV file loaded');
+            return;
+        }
+
         const newOrder = Array.from(reorderList.querySelectorAll('.csv-reorder-item')).map(item => item.dataset.column);
         const firstTableName = csvFiles.keys().next().value;
         const sql = `SELECT ${newOrder.join(', ')} FROM "${firstTableName}"`;
+        
+        // Update SQL input
         sqlInput.value = sql;
-        runBtn.click();
+        
+        // Execute query
+        try {
+            const ast = parseSQL(sql);
+            const results = executeQuery(ast);
+            lastQueryResult = results;
+
+            if (results.length === 0) {
+                showError('Reorder returned 0 rows');
+                return;
+            }
+
+            const headers = Object.keys(results[0]);
+            const rows = results.map(r => headers.map(h => r[h]));
+            const infoText = `${results.length} rows with columns in new order: ${newOrder.join(', ')}`;
+            
+            // Show in modal
+            openModal('Reordered Data', headers, rows, infoText);
+            
+            // Also update main results section
+            resultsInfo.textContent = `Query returned ${results.length} row${results.length !== 1 ? 's' : ''}`;
+            renderTable(headers, rows, resultsTable);
+            resultsSection.style.display = '';
+            hideError();
+        } catch (error) {
+            showError(`Reorder error: ${error.message}`);
+        }
     });
 
     // ==========================================
