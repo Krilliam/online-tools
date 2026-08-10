@@ -2577,3 +2577,130 @@ pre code {
         grid-template-columns: 1fr;
     }
 }
+/* =========================================
+   CSV Query Tool - Modal
+   ========================================= */
+.csv-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.csv-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+.csv-modal-container {
+    position: relative;
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 90vw;
+    max-height: 85vh;
+    width: 1000px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.csv-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-card);
+    background-color: var(--bg-output);
+}
+
+.csv-modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.csv-modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.75rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.csv-modal-close-btn:hover {
+    background-color: var(--border-card);
+    color: var(--text-primary);
+}
+
+.csv-modal-info {
+    padding: 0.75rem 1.5rem;
+    background-color: rgba(0, 102, 204, 0.05);
+    border-bottom: 1px solid var(--border-card);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.csv-modal-body {
+    flex: 1;
+    overflow: auto;
+    padding: 1.5rem;
+}
+
+.csv-modal-body .csv-table {
+    margin-top: 0;
+}
+
+.csv-modal-body .csv-table-wrapper {
+    margin-top: 0;
+    border: none;
+}
+
+.csv-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-card);
+    background-color: var(--bg-output);
+}
+
+@media (max-width: 768px) {
+    .csv-modal {
+        padding: 1rem;
+    }
+
+    .csv-modal-container {
+        max-width: 100%;
+        max-height: 90vh;
+    }
+
+    .csv-modal-footer {
+        flex-wrap: wrap;
+    }
+
+    .csv-modal-footer .btn {
+        flex: 1;
+        min-width: 100px;
+    }
+}
